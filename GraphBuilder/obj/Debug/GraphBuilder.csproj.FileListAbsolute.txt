@@ -1,0 +1,17 @@
+C:\Users\edrum\source\repos\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder.csproj.SuggestedBindingRedirects.cache
+C:\Users\edrum\source\repos\GraphBuilder\GraphBuilder\obj\Debug\MainWindow.g.cs
+C:\Users\edrum\source\repos\GraphBuilder\GraphBuilder\obj\Debug\App.g.cs
+C:\Users\edrum\source\repos\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder_MarkupCompile.cache
+C:\Users\edrum\source\repos\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder_MarkupCompile.lref
+C:\Users\edrum\source\repos\GraphBuilder\GraphBuilder\bin\Debug\GraphBuilder.exe.config
+C:\Users\edrum\source\repos\GraphBuilder\GraphBuilder\bin\Debug\GraphBuilder.exe
+C:\Users\edrum\source\repos\GraphBuilder\GraphBuilder\bin\Debug\GraphBuilder.pdb
+C:\Users\edrum\source\repos\GraphBuilder\GraphBuilder\obj\Debug\App.baml
+C:\Users\edrum\source\repos\GraphBuilder\GraphBuilder\obj\Debug\MainWindow.baml
+C:\Users\edrum\source\repos\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder.g.resources
+C:\Users\edrum\source\repos\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder.Properties.Resources.resources
+C:\Users\edrum\source\repos\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder.csproj.GenerateResource.cache
+C:\Users\edrum\source\repos\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder.csproj.CoreCompileInputs.cache
+C:\Users\edrum\source\repos\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder.exe
+C:\Users\edrum\source\repos\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder.pdb
+C:\Users\edrum\source\repos\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder.csproj.AssemblyReference.cache
