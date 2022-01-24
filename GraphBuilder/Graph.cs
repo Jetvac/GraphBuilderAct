@@ -11,8 +11,9 @@ namespace GraphBuilder
 {
     public class Graph
     {
-        const int WIDTH = 40;
-        const int HEIGHT = 40;
+        public List<Node> graphNodes { get; set; } = new List<Node>();
+        public List<Edge> graphEdges { get; set; } = new List<Edge>();
+
 
         public class Edge 
         {
@@ -20,13 +21,8 @@ namespace GraphBuilder
             {
                 BaseNode = baseNode;
                 AddressNode = addressNode;
-                VisualAdapter = new Line()
-                {
-                    Style = (Style)MainWindow.AppResources["Edge"],
-                    X1 = BaseNode.PosX + WIDTH / 2, Y1 = BaseNode.PosY + HEIGHT / 2,
-                    X2 = AddressNode.PosX + WIDTH / 2, Y2 = AddressNode.PosY + HEIGHT / 2
-                };
 
+                //Add dependencies to node
                 baseNode.baseEdges.Add(this);
                 addressNode.addressEdges.Add(this);
             }
@@ -36,46 +32,42 @@ namespace GraphBuilder
             public Node AddressNode { get; set; }
 
             public double Value { get; set; }
-
-            public void ChangeStartPosition(double newStartX, double newStartY)
-            {
-                VisualAdapter.X1 = newStartX + WIDTH / 2;
-                VisualAdapter.Y1 = newStartY + HEIGHT / 2;
-            }
-
-            public void ChangeEndPosition(double newEndX, double newEndY)
-            {
-                VisualAdapter.X2 = newEndX + WIDTH / 2;
-                VisualAdapter.Y2 = newEndY + HEIGHT / 2;
-            }
         }
         public class Node
         {
-            public Node(double posX, double posY, string name)
+            public Node(string name, double posX, double posY)
             {
-                Name = name;
                 PosX = posX;
                 PosY = posY;
-                VisualAdapter = new Label()
-                { Style = (Style)MainWindow.AppResources["Node"], Width = WIDTH, Height = HEIGHT, Content = Name };
-
-                VisualAdapter.MouseUp += MainWindow.Node_MouseUp;
-                VisualAdapter.MouseDown += MainWindow.Node_MouseDown;
-                VisualAdapter.MouseMove += MainWindow.Node_MouseMove;
+                Name = name;
             }
-            public double PosX { get; set; }
-            public double PosY { get; set; }
             public string Name { get; set; }
             public Label VisualAdapter { get; set; }
+            public double PosX { get; set; }
+            public double PosY { get; set; }
 
             public List<Edge> baseEdges { get; set; } = new List<Edge>();
             public List<Edge> addressEdges { get; set; } = new List<Edge>();
+        }
 
-            public void ChangePosition(double newPosX, double newPosY)
-            {
-                PosX = newPosX;
-                PosY = newPosY;
-            }
+        /// <summary>
+        /// Search node in graph list with same visualAdapter signature
+        /// </summary>
+        /// <param name="visualAdapter"></param>
+        /// <returns>Node item</returns>
+        public Node FindNodeByAdapter(Label visualAdapter)
+        {
+            return graphNodes.Where(c => c.VisualAdapter.Equals(visualAdapter)).First();
+        }
+
+        /// <summary>
+        /// Search edge in graph list with same visualAdapter signature
+        /// </summary>
+        /// <param name="visualAdapter"></param>
+        /// <returns>Edge item</returns>
+        public Edge FindEdgeByAdapter(Line visualAdapter)
+        {
+            return graphEdges.Where(c => c.VisualAdapter.Equals(visualAdapter)).First();
         }
     }
 }

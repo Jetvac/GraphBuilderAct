@@ -7,7 +7,16 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded" >
     <Grid>
-        <Canvas x:Name="Workplace">
-        </Canvas>
+        <!-- Logical element that using for drawing node and edge -->
+        <Border x:Name="GraphicRender">
+            <Grid>
+                <!-- First render layer -->
+                <Canvas x:Name="EdgeRender">
+                </Canvas>
+                <!-- Second render layer -->
+                <Canvas x:Name="NodeRender">
+                </Canvas>
+            </Grid>
+        </Border>
     </Grid>
 </Window>
