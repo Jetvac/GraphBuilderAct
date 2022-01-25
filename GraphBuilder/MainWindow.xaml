@@ -7,8 +7,13 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded" >
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="200"/>
+        </Grid.ColumnDefinitions>
+        
         <!-- Logical element that using for drawing node and edge -->
-        <Border x:Name="GraphicRender">
+        <Border x:Name="GraphicRender" Background="White" MouseLeftButtonDown="Grid_MouseLeftButtonDown">
             <Grid>
                 <!-- First render layer -->
                 <Canvas x:Name="EdgeRender">
@@ -16,6 +21,19 @@
                 <!-- Second render layer -->
                 <Canvas x:Name="NodeRender">
                 </Canvas>
+            </Grid>
+        </Border>
+
+        <Border Grid.Column="1" Background="AliceBlue" BorderThickness="2 0 0 0" BorderBrush="LightBlue">
+            <Grid x:Name="UserActiveController" Height="100" VerticalAlignment="Top">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Button x:Name="AddNodeSwitch" Margin="5" Grid.Row="0" Click="AddNodeSwitch_Click">Добавить узел</Button>
+                <Button x:Name="AddEdgeSwitch" Margin="5" Grid.Row="1" Click="AddEdgeSwitch_Click">Соединить вершины</Button>
+                <Button x:Name="DefaultModeSwitch" Margin="5" Grid.Row="2" Click="DefaultModeSwitch_Click">По умолчанию</Button>
             </Grid>
         </Border>
     </Grid>

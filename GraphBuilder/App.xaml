@@ -22,6 +22,24 @@
             </Setter>
         </Style>
 
+        <Style TargetType="Label" x:Key="NodeActive">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Label">
+                        <Border x:Name="brd" 
+                                Background="White" BorderBrush="PaleVioletRed" BorderThickness="2" CornerRadius="50">
+                            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="{TemplateBinding Content}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter TargetName="brd" Property="BorderBrush" Value="Red"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style TargetType="Line" x:Key="Edge">
             <Setter Property="StrokeThickness" Value="1"/>
             <Setter Property="Stroke" Value="Gray"/>
