@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Shapes;
@@ -39,7 +40,7 @@ namespace GraphBuilder
         /// <returns>Created node</returns>
         public Node InitializeNode(string name, double posX, double posY)
         {
-            Node created = new Node(name, posX, posY);
+            Node created = _graphRef.CreateBaseNode(name, posX, posY);
 
             //Create label object and add basic event dependencies
             created.VisualAdapter = new Label()
@@ -63,7 +64,7 @@ namespace GraphBuilder
         /// <returns></returns>
         public Edge AddEdge(Node baseNode, Node addressNode)
         {
-            Edge created = new Edge(baseNode, addressNode);
+            Edge created = _graphRef.CreateBaseEdge(baseNode, addressNode);
             created.VisualAdapter = new Line() { Style = (Style)MainWindow.AppResources["Edge"] };
 
             //Place edge on canvas
@@ -182,6 +183,9 @@ namespace GraphBuilder
                 case UserInputController.EdgeCreating:
                     CurrentUserControlType = UserInputController.EdgeCreating;
                     break;
+                case UserInputController.NodeDelete:
+                    CurrentUserControlType = UserInputController.NodeDelete;
+                    break;
             }
         }
         /// <summary>
@@ -228,13 +232,22 @@ namespace GraphBuilder
                     }
                     else
                     {
-                        // Were selected another node
-                        if (_activatedNode != selectedNode)
+                        // Were selected another node and check existance
+                        if (_activatedNode != selectedNode && _graphRef.SearchEdgeByNodes(_activatedNode, selectedNode) == null)
                         {
-                            _graphRef.graphEdges.Add(AddEdge(_activatedNode, selectedNode));
+                            AddEdge(_activatedNode, selectedNode);
+                        } else
+                        {
+                            MessageBox.Show("Предлагаемое ребро существует", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                         TakeOffNodeActivation();
                     }
+                    break;
+                case UserInputController.NodeDelete:
+                    List<Edge> removed = _graphRef.RemoveNode(selectedNode);
+                    foreach (Edge item in removed)
+                        _edgeLayer.Children.Remove(item.VisualAdapter);
+                    _nodeLayer.Children.Remove(selectedNode.VisualAdapter);
                     break;
             }
         }

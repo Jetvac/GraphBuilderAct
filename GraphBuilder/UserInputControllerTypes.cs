@@ -11,6 +11,7 @@ namespace GraphBuilder
     {
         Default = 0,
         NodeCreating = 1,
-        EdgeCreating = 2
+        EdgeCreating = 2,
+        NodeDelete = 3
     }
 }

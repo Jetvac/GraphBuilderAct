@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Shapes;
 
@@ -11,8 +7,8 @@ namespace GraphBuilder
 {
     public class Graph
     {
-        public List<Node> graphNodes { get; set; } = new List<Node>();
-        public List<Edge> graphEdges { get; set; } = new List<Edge>();
+        private List<Node> graphNodes { get; set; } = new List<Node>();
+        private List<Edge> graphEdges { get; set; } = new List<Edge>();
 
 
         public class Edge 
@@ -50,8 +46,39 @@ namespace GraphBuilder
             public List<Edge> addressEdges { get; set; } = new List<Edge>();
         }
 
-        
 
+        public Node CreateBaseNode(string name, double posX, double posY)
+        {
+            Node result = new Node(name, posX, posY);
+
+            graphNodes.Add(result);
+
+            return result;
+        }
+        public Edge CreateBaseEdge(Node baseNode, Node addressNode)
+        {
+            Edge result = new Edge(baseNode, addressNode);
+
+            graphEdges.Add(result);
+
+            return result;
+        }
+        /// <summary>
+        /// Find all references on node and delete it
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public List<Edge> RemoveNode(Node node)
+        {
+            List<Edge> removedEdges = graphEdges.Where(c => c.BaseNode == node || c.AddressNode == node).ToList();
+            foreach (Edge item in removedEdges)
+                graphEdges.Remove(item);
+            graphNodes.Remove(node);
+
+            return removedEdges;
+        }
+
+        //Get interface
         /// <summary>
         /// Search node in graph list with same visualAdapter signature
         /// </summary>
@@ -61,7 +88,6 @@ namespace GraphBuilder
         {
             return graphNodes.Where(c => c.VisualAdapter.Equals(visualAdapter)).First();
         }
-
         /// <summary>
         /// Search edge in graph list with same visualAdapter signature
         /// </summary>
@@ -70,6 +96,28 @@ namespace GraphBuilder
         public Edge FindEdgeByAdapter(Line visualAdapter)
         {
             return graphEdges.Where(c => c.VisualAdapter.Equals(visualAdapter)).First();
+        }
+        public Edge SearchEdgeByNodes(Node baseNode, Node addressNode)
+        {
+            return graphEdges.FirstOrDefault(c => c.BaseNode == baseNode && c.AddressNode == addressNode);
+        }
+        /// <summary>
+        /// Return node from list by given position
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public Node GetNodeById(int id)
+        {
+            return graphNodes[id];
+        }
+        /// <summary>
+        /// Return edge from list by given position
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public Edge GetEdgeById(int id)
+        {
+            return graphEdges[id];
         }
     }
 }
