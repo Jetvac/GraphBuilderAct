@@ -50,6 +50,8 @@ namespace GraphBuilder
             public List<Edge> addressEdges { get; set; } = new List<Edge>();
         }
 
+        
+
         /// <summary>
         /// Search node in graph list with same visualAdapter signature
         /// </summary>

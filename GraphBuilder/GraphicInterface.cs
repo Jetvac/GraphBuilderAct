@@ -169,7 +169,7 @@ namespace GraphBuilder
         //Logic
         public void SwitchCurrentControlMode(UserInputController type)
         {
-            switch (CurrentUserControlType)
+            switch (type)
             {
                 case UserInputController.Default:
                     TakeOffNodeActivation();
@@ -214,8 +214,29 @@ namespace GraphBuilder
         }
         public void Node_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            Node selectedNode = _graphRef.FindNodeByAdapter((Label)sender);
+
             _movePoint = null;
             ((Label)sender).ReleaseMouseCapture();
+
+            switch (CurrentUserControlType)
+            {
+                case UserInputController.EdgeCreating:
+                    if (_activatedNode == null)
+                    {
+                        MakeNodeActive(selectedNode);
+                    }
+                    else
+                    {
+                        // Were selected another node
+                        if (_activatedNode != selectedNode)
+                        {
+                            _graphRef.graphEdges.Add(AddEdge(_activatedNode, selectedNode));
+                        }
+                        TakeOffNodeActivation();
+                    }
+                    break;
+            }
         }
         public void Node_MouseMove(object sender, MouseEventArgs e)
         {
@@ -231,21 +252,6 @@ namespace GraphBuilder
                     break;
 
                 case UserInputController.NodeCreating:
-                    break;
-
-                case UserInputController.EdgeCreating:
-                    if (_activatedNode == null)
-                    {
-                        MakeNodeActive(selectedNode);
-                    } else
-                    {
-                        // Were selected another node
-                        if (_activatedNode != selectedNode)
-                        {
-                            _graphRef.graphEdges.Add(AddEdge(_activatedNode, selectedNode));
-                        }
-                        TakeOffNodeActivation();
-                    }
                     break;
             }
         }
