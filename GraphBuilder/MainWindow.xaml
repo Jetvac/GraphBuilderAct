@@ -18,6 +18,9 @@
                 <!-- First render layer -->
                 <Canvas x:Name="EdgeRender">
                 </Canvas>
+                <!-- Weight render layer -->
+                <Canvas x:Name="WeightRender">
+                </Canvas>
                 <!-- Second render layer -->
                 <Canvas x:Name="NodeRender">
                 </Canvas>

@@ -17,7 +17,7 @@ namespace GraphBuilder
             InitializeComponent();
             AppResources = Application.Current.Resources;
 
-            GraphicController = new GraphicInterface(EdgeRender, NodeRender, ref Graph);
+            GraphicController = new GraphicInterface(EdgeRender, NodeRender, WeightRender,  ref Graph);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)

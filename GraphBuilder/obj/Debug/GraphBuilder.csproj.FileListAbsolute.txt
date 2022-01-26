@@ -48,3 +48,4 @@ C:\Users\edrum\Documents\GitHub\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder
 C:\Users\edrum\Documents\GitHub\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder.exe
 C:\Users\edrum\Documents\GitHub\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder.pdb
 C:\Users\edrum\Documents\GitHub\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder.csproj.AssemblyReference.cache
+C:\Users\edrum\Documents\GitHub\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder.csproj.SuggestedBindingRedirects.cache

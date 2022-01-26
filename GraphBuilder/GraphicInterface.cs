@@ -15,6 +15,8 @@ namespace GraphBuilder
 
         private Canvas _edgeLayer { get; set; }
         private Canvas _nodeLayer { get; set; }
+        private Canvas _weightLayer { get; set; }
+
         //Initialize an object that using for dedicating of mouse position
         private Point? _movePoint;
         private Graph _graphRef { get; set; }
@@ -22,18 +24,19 @@ namespace GraphBuilder
 
         //Used for user control logic
         public UserInputController CurrentUserControlType { get; set; } = UserInputController.Default;
-
-
-
-        public GraphicInterface(Canvas edgeLayer, Canvas nodeLayer, ref Graph graph)
+        public GraphicInterface(Canvas edgeLayer, Canvas nodeLayer, Canvas weightLayer, ref Graph graph)
         {
             _edgeLayer = edgeLayer;
             _nodeLayer = nodeLayer;
+            _weightLayer = weightLayer;
 
             _graphRef = graph;
         }
 
-        //Graphic
+
+
+
+        //Object initialize methods
         /// <summary>
         /// Initialize node, set basic dependencies and place it on canvas
         /// </summary>
@@ -54,7 +57,6 @@ namespace GraphBuilder
 
             return created;
         }
-
         /// <summary>
         /// Initialize and add edge to node, set basic dependencies and place it on canvas
         /// </summary>
@@ -62,25 +64,53 @@ namespace GraphBuilder
         /// <param name="baseNode"></param>
         /// <param name="addressNode"></param>
         /// <returns></returns>
-        public Edge AddEdge(Node baseNode, Node addressNode)
+        public Edge AddEdge(Node baseNode, Node addressNode, double value)
         {
-            Edge created = _graphRef.CreateBaseEdge(baseNode, addressNode);
+            Weight weightAdapter = CreateWeightAdapter(value);
+
+            Edge created = _graphRef.CreateBaseEdge(baseNode, addressNode, weightAdapter);
             created.VisualAdapter = new Line() { Style = (Style)MainWindow.AppResources["Edge"] };
 
-            //Place edge on canvas
+            //Place edge on canvas 
             PlaceEdge(created, baseNode, addressNode);
+            //Place weight on canvas (Strict after placing edge)
+            PlaceWeight(weightAdapter, created);
 
             return created;
         }
+        /// <summary>
+        /// Intitialize and add weight to edge, set basic dependencies and place it on canvas
+        /// </summary>
+        /// <param name="weight"></param>
+        /// <returns></returns>
+        public Weight CreateWeightAdapter(double weight)
+        {
+            TextBox visualAdapter = new TextBox() { Text = weight.ToString() };
+            Weight result = new Weight(weight, visualAdapter);
 
+            return result;
+        }
 
+        //Object delete methods
+        public void RemoveNode(Node node)
+        {
+            _nodeLayer.Children.Remove(node.VisualAdapter);
+        }
+        public void RemoveNodeRelatedEdges(Node clearingNode)
+        {
+            List<Edge> removed = _graphRef.RemoveNode(clearingNode);
+            foreach (Edge item in removed)
+                _edgeLayer.Children.Remove(item.VisualAdapter);
+        }
+
+        //Object positioning methods
         /// <summary>
         /// Change node position on canvas
         /// </summary>
         /// <param name="node"></param>
         /// <param name="newPosX"></param>
         /// <param name="newPosY"></param>
-        public void MoveNode(Node node, double newPosX, double newPosY)
+        public void MoveNodeStructure(Node node, double newPosX, double newPosY)
         {
             node.PosX = newPosX;
             node.PosY = newPosY;
@@ -93,15 +123,24 @@ namespace GraphBuilder
             foreach (Edge edge in node.baseEdges)
             {
                 MoveFirstPointOfEdge(edge, newPosX, newPosY);
+                MoveWeightAdapter(edge);
             }
 
             //Move edge on canvas (Second Position)
             foreach (Edge edge in node.addressEdges)
             {
                 MoveSecondPointOfEdge(edge, newPosX, newPosY);
+                MoveWeightAdapter(edge);
             }
         }
-
+        //TODO: Add central positioning
+        private void MoveWeightAdapter(Edge parentEdge)
+        {
+            Canvas.SetLeft(parentEdge.WeightAdapter.VisualAdapter, 
+                ((parentEdge.BaseNode.PosX + parentEdge.AddressNode.PosX) / 2) + WIDTH / 2);
+            Canvas.SetTop(parentEdge.WeightAdapter.VisualAdapter, 
+                ((parentEdge.BaseNode.PosY + parentEdge.AddressNode.PosY) / 2) + WIDTH / 2);
+        }
         /// <summary>
         /// Change position of first point of edge on canvas
         /// </summary>
@@ -113,7 +152,6 @@ namespace GraphBuilder
             edge.VisualAdapter.X1 = newPosX + WIDTH / 2;
             edge.VisualAdapter.Y1 = newPosY + HEIGHT / 2;
         }
-
         /// <summary>
         /// Change position of second point of edge on canvas
         /// </summary>
@@ -126,6 +164,8 @@ namespace GraphBuilder
             edge.VisualAdapter.Y2 = newPosY + HEIGHT / 2;
         }
 
+
+        //Object place methods (On canvas)
         /// <summary>
         /// Place node on canvas by given position
         /// </summary>
@@ -138,7 +178,6 @@ namespace GraphBuilder
         {
             //check data
             if (node == null) return false;
-            if (_nodeLayer.Children.Contains(node.VisualAdapter)) { _nodeLayer.Children.Remove(node.VisualAdapter); }
 
             _nodeLayer.Children.Add(node.VisualAdapter);
             Canvas.SetLeft(node.VisualAdapter, node.PosX);
@@ -146,7 +185,6 @@ namespace GraphBuilder
 
             return true;
         }
-
         /// <summary>
         /// Place edge on canvas
         /// </summary>
@@ -162,6 +200,19 @@ namespace GraphBuilder
             MoveFirstPointOfEdge(edge, baseNode.PosX, baseNode.PosY);
             MoveSecondPointOfEdge(edge, addressNode.PosX, addressNode.PosY);
             _edgeLayer.Children.Add(edge.VisualAdapter);
+
+            return true;
+        }
+        /// <summary>
+        /// Place weight on canvas at center of two nodes (Base and parent)
+        /// </summary>
+        /// <param name="weight"></param>
+        /// <param name="parentEdge"></param>
+        /// <returns></returns>
+        private bool PlaceWeight(Weight weight, Edge parentEdge)
+        {
+            _weightLayer.Children.Add(weight.VisualAdapter);
+            MoveWeightAdapter(parentEdge);
 
             return true;
         }
@@ -235,7 +286,7 @@ namespace GraphBuilder
                         // Were selected another node and check existance
                         if (_activatedNode != selectedNode && _graphRef.SearchEdgeByNodes(_activatedNode, selectedNode) == null)
                         {
-                            AddEdge(_activatedNode, selectedNode);
+                            AddEdge(_activatedNode, selectedNode, 100);
                         } else
                         {
                             MessageBox.Show("Предлагаемое ребро существует", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -244,10 +295,8 @@ namespace GraphBuilder
                     }
                     break;
                 case UserInputController.NodeDelete:
-                    List<Edge> removed = _graphRef.RemoveNode(selectedNode);
-                    foreach (Edge item in removed)
-                        _edgeLayer.Children.Remove(item.VisualAdapter);
-                    _nodeLayer.Children.Remove(selectedNode.VisualAdapter);
+                    
+                    
                     break;
             }
         }
@@ -261,7 +310,7 @@ namespace GraphBuilder
             switch (CurrentUserControlType)
             {
                 case UserInputController.Default:
-                    MoveNode(selectedNode, p.X, p.Y);
+                    MoveNodeStructure(selectedNode, p.X, p.Y);
                     break;
 
                 case UserInputController.NodeCreating:

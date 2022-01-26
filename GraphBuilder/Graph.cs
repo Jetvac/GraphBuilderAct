@@ -13,10 +13,11 @@ namespace GraphBuilder
 
         public class Edge 
         {
-            public Edge(Node baseNode, Node addressNode)
+            public Edge(Node baseNode, Node addressNode, Weight weightAdapter)
             {
                 BaseNode = baseNode;
                 AddressNode = addressNode;
+                WeightAdapter = weightAdapter;
 
                 //Add dependencies to node
                 baseNode.baseEdges.Add(this);
@@ -27,7 +28,7 @@ namespace GraphBuilder
             public Node BaseNode { get; set; }
             public Node AddressNode { get; set; }
 
-            public double Value { get; set; }
+            public Weight WeightAdapter { get; set; }
         }
         public class Node
         {
@@ -45,6 +46,17 @@ namespace GraphBuilder
             public List<Edge> baseEdges { get; set; } = new List<Edge>();
             public List<Edge> addressEdges { get; set; } = new List<Edge>();
         }
+        public class Weight
+        {
+            public double Value { get; set; }
+            public TextBox VisualAdapter { get; set; }
+
+            public Weight(double value, TextBox visual)
+            {
+                Value = value;
+                VisualAdapter = visual;
+            }
+        }
 
 
         public Node CreateBaseNode(string name, double posX, double posY)
@@ -55,9 +67,9 @@ namespace GraphBuilder
 
             return result;
         }
-        public Edge CreateBaseEdge(Node baseNode, Node addressNode)
+        public Edge CreateBaseEdge(Node baseNode, Node addressNode, Weight weightAdapter)
         {
-            Edge result = new Edge(baseNode, addressNode);
+            Edge result = new Edge(baseNode, addressNode, weightAdapter);
 
             graphEdges.Add(result);
 
