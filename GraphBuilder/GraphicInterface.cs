@@ -300,17 +300,29 @@ namespace GraphBuilder
                     }
                     else
                     {
-                        if (_activatedNode != selectedNode && _graphRef.SearchEdgeByNodes(_activatedNode, selectedNode) == null)
+                        if (_activatedNode == selectedNode) { TakeOffNodeActivation(); return; }
+                        Edge onewayEdge = _graphRef.SearchEdgeByNodes(selectedNode, _activatedNode);
+
+
+                        //TODO: Correct check
+                        if (onewayEdge != null)
                         {
-                            //If alternate trase already exists, remaking him into doubleway
-                            if (_graphRef.SearchEdgeByNodes(selectedNode, _activatedNode) != null)
+                            //If edge already doubleway
+                            if (_activatedNode.baseEdges.Contains(onewayEdge) && selectedNode.baseEdges.Contains(onewayEdge))
                             {
-                                
+                                MessageBox.Show("Предлагаемое ребро существует", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
                             }
-                            AddEdge(_activatedNode, selectedNode, 100);
-                        } else
+                            else //If alternate trase already exists, remaking him into doubleway
+                            {
+                                //Add reference on edge in address node
+                                onewayEdge.AddressNode.baseEdges.Add(onewayEdge);
+                                onewayEdge.BaseNode.addressEdges.Add(onewayEdge);
+                            }
+                        }
+                        else
                         {
-                            MessageBox.Show("Предлагаемое ребро существует", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+                            //Create new edge
+                            AddEdge(_activatedNode, selectedNode, 100);
                         }
                         TakeOffNodeActivation();
                     }
