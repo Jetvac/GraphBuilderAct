@@ -86,22 +86,39 @@ namespace GraphBuilder
         public Weight CreateWeightAdapter(double weight)
         {
             TextBox visualAdapter = new TextBox() { Text = weight.ToString() };
+            visualAdapter.TextChanged += WeightTxtBx_TextChanged;
             Weight result = new Weight(weight, visualAdapter);
 
             return result;
         }
+        
 
         //Object delete methods
-        public void RemoveNode(Node node)
+        /// <summary>
+        /// Delete node from references graph logic structure
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns>Related edges with removed node</returns>
+        public List<Edge> RemoveNode(Node node)
         {
+            List<Edge> relatedEdges = _graphRef.RemoveNode(node);
             _nodeLayer.Children.Remove(node.VisualAdapter);
+
+            return relatedEdges;
         }
-        public void RemoveNodeRelatedEdges(Node clearingNode)
+        public void RemoveNodeRelatedEdges(List<Edge> edges)
         {
-            List<Edge> removed = _graphRef.RemoveNode(clearingNode);
-            foreach (Edge item in removed)
+            foreach (Edge item in edges)
+            {
                 _edgeLayer.Children.Remove(item.VisualAdapter);
+                RemoveEdgeRelatedWeight(item);
+            }
         }
+        public void RemoveEdgeRelatedWeight(Edge parent)
+        {
+            _weightLayer.Children.Remove(parent.WeightAdapter.VisualAdapter);
+        }
+
 
         //Object positioning methods
         /// <summary>
@@ -137,9 +154,9 @@ namespace GraphBuilder
         private void MoveWeightAdapter(Edge parentEdge)
         {
             Canvas.SetLeft(parentEdge.WeightAdapter.VisualAdapter, 
-                ((parentEdge.BaseNode.PosX + parentEdge.AddressNode.PosX) / 2) + WIDTH / 2);
+                ((parentEdge.BaseNode.PosX + parentEdge.AddressNode.PosX) / 2) + (WIDTH / 2) - (parentEdge.WeightAdapter.VisualAdapter.ActualWidth / 2));
             Canvas.SetTop(parentEdge.WeightAdapter.VisualAdapter, 
-                ((parentEdge.BaseNode.PosY + parentEdge.AddressNode.PosY) / 2) + WIDTH / 2);
+                ((parentEdge.BaseNode.PosY + parentEdge.AddressNode.PosY) / 2) + (WIDTH / 2) - (parentEdge.WeightAdapter.VisualAdapter.ActualHeight / 2));
         }
         /// <summary>
         /// Change position of first point of edge on canvas
@@ -283,9 +300,13 @@ namespace GraphBuilder
                     }
                     else
                     {
-                        // Were selected another node and check existance
                         if (_activatedNode != selectedNode && _graphRef.SearchEdgeByNodes(_activatedNode, selectedNode) == null)
                         {
+                            //If alternate trase already exists, remaking him into doubleway
+                            if (_graphRef.SearchEdgeByNodes(selectedNode, _activatedNode) != null)
+                            {
+                                
+                            }
                             AddEdge(_activatedNode, selectedNode, 100);
                         } else
                         {
@@ -295,8 +316,8 @@ namespace GraphBuilder
                     }
                     break;
                 case UserInputController.NodeDelete:
-                    
-                    
+                    List<Edge> trashEdges = RemoveNode(selectedNode);
+                    RemoveNodeRelatedEdges(trashEdges);
                     break;
             }
         }
@@ -316,6 +337,13 @@ namespace GraphBuilder
                 case UserInputController.NodeCreating:
                     break;
             }
+        }
+
+
+        //Another triggers
+        private void WeightTxtBx_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            MoveWeightAdapter(_graphRef.FindWeightByAdapterInEdge((TextBox)sender));
         }
     }
 }

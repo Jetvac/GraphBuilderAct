@@ -109,6 +109,15 @@ namespace GraphBuilder
         {
             return graphEdges.Where(c => c.VisualAdapter.Equals(visualAdapter)).First();
         }
+        /// <summary>
+        /// Search edge by weight adapter
+        /// </summary>
+        /// <param name="visualAdapter"></param>
+        /// <returns></returns>
+        public Edge FindWeightByAdapterInEdge(TextBox visualAdapter)
+        {
+            return graphEdges.FirstOrDefault(c => c.WeightAdapter.VisualAdapter == visualAdapter);
+        }
         public Edge SearchEdgeByNodes(Node baseNode, Node addressNode)
         {
             return graphEdges.FirstOrDefault(c => c.BaseNode == baseNode && c.AddressNode == addressNode);
