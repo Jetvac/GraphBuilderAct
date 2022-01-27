@@ -8,26 +8,16 @@ namespace GraphBuilder
     public class Graph
     {
         private List<Node> graphNodes { get; set; } = new List<Node>();
-        private List<Edge> graphEdges { get; set; } = new List<Edge>();
 
 
         public class Edge 
         {
-            public Edge(Node baseNode, Node addressNode, Weight weightAdapter)
+            public Edge(Weight weightAdapter)
             {
-                BaseNode = baseNode;
-                AddressNode = addressNode;
                 WeightAdapter = weightAdapter;
-
-                //Add dependencies to node
-                baseNode.baseEdges.Add(this);
-                addressNode.addressEdges.Add(this);
             }
 
             public Line VisualAdapter { get; set; }
-            public Node BaseNode { get; set; }
-            public Node AddressNode { get; set; }
-
             public Weight WeightAdapter { get; set; }
         }
         public class Node
@@ -69,9 +59,10 @@ namespace GraphBuilder
         }
         public Edge CreateBaseEdge(Node baseNode, Node addressNode, Weight weightAdapter)
         {
-            Edge result = new Edge(baseNode, addressNode, weightAdapter);
+            Edge result = new Edge(weightAdapter);
 
-            graphEdges.Add(result);
+            baseNode.baseEdges.Add(result);
+            addressNode.addressEdges.Add(result);
 
             return result;
         }
@@ -82,12 +73,59 @@ namespace GraphBuilder
         /// <returns></returns>
         public List<Edge> RemoveNode(Node node)
         {
-            List<Edge> removedEdges = graphEdges.Where(c => c.BaseNode == node || c.AddressNode == node).ToList();
-            foreach (Edge item in removedEdges)
-                graphEdges.Remove(item);
+            List<Edge> removedEdges = node.baseEdges; removedEdges.AddRange(node.addressEdges);
             graphNodes.Remove(node);
 
             return removedEdges;
+        }
+        public Edge FindEdgeByWeightAdapter(TextBox weight)
+        {
+            foreach(Node node in graphNodes)
+            {
+                Edge edge = node.baseEdges.FirstOrDefault(c => c.WeightAdapter.VisualAdapter == weight);
+                return edge;
+            }
+            return null;
+        }
+        /// <summary>
+        /// Search node in baseEdges list 
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <returns></returns>
+        public Node FindBaseNodeByEdge(Edge edge)
+        {
+            return graphNodes.FirstOrDefault(c => c.baseEdges.Contains(edge));
+        }
+        /// <summary>
+        /// Search node in addressEdges list
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <returns></returns>
+        public Node FindAdressNodeByEdge(Edge edge)
+        {
+            return graphNodes.FirstOrDefault(c => c.addressEdges.Contains(edge));
+        }
+        public Edge SearchEdgeByNodes(Node baseNode, Node addressNode)
+        {
+            foreach (Edge edge in baseNode.baseEdges)
+            {
+                if (addressNode.addressEdges.Contains(edge))
+                {
+                    return edge;
+                }
+            }
+            return null;
+        }
+        public Node SearchNodeByEdgeAndNode(Edge edge, Node baseNode)
+        {
+            foreach(Node addressNode in graphNodes)
+            {
+                if (addressNode.baseEdges.Contains(edge) && addressNode != baseNode)
+                {
+                    return addressNode;
+                }
+            }
+            return null;
         }
 
         //Get interface
@@ -100,45 +138,9 @@ namespace GraphBuilder
         {
             return graphNodes.Where(c => c.VisualAdapter.Equals(visualAdapter)).First();
         }
-        /// <summary>
-        /// Search edge in graph list with same visualAdapter signature
-        /// </summary>
-        /// <param name="visualAdapter"></param>
-        /// <returns>Edge item</returns>
-        public Edge FindEdgeByAdapter(Line visualAdapter)
-        {
-            return graphEdges.Where(c => c.VisualAdapter.Equals(visualAdapter)).First();
-        }
-        /// <summary>
-        /// Search edge by weight adapter
-        /// </summary>
-        /// <param name="visualAdapter"></param>
-        /// <returns></returns>
-        public Edge FindWeightByAdapterInEdge(TextBox visualAdapter)
-        {
-            return graphEdges.FirstOrDefault(c => c.WeightAdapter.VisualAdapter == visualAdapter);
-        }
-        public Edge SearchEdgeByNodes(Node baseNode, Node addressNode)
-        {
-            return graphEdges.FirstOrDefault(c => c.BaseNode == baseNode && c.AddressNode == addressNode);
-        }
-        /// <summary>
-        /// Return node from list by given position
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
         public Node GetNodeById(int id)
         {
             return graphNodes[id];
-        }
-        /// <summary>
-        /// Return edge from list by given position
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public Edge GetEdgeById(int id)
-        {
-            return graphEdges[id];
         }
     }
 }

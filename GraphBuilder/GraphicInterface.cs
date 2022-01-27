@@ -136,27 +136,47 @@ namespace GraphBuilder
             Canvas.SetLeft(node.VisualAdapter, newPosX);
             Canvas.SetTop(node.VisualAdapter, newPosY);
 
+            List<Edge> doublewayEdges = SearchDoublewayEdges(node.baseEdges, node.addressEdges);
+
             //Move edge on canvas (First Position)
             foreach (Edge edge in node.baseEdges)
             {
-                MoveFirstPointOfEdge(edge, newPosX, newPosY);
-                MoveWeightAdapter(edge);
+                if (!doublewayEdges.Contains(edge))
+                {
+                    MoveFirstPointOfEdge(edge, newPosX, newPosY);
+                    MoveWeightAdapter(edge);
+                }
             }
 
             //Move edge on canvas (Second Position)
             foreach (Edge edge in node.addressEdges)
             {
-                MoveSecondPointOfEdge(edge, newPosX, newPosY);
+                if (!doublewayEdges.Contains(edge))
+                {
+                    MoveSecondPointOfEdge(edge, newPosX, newPosY);
+                    MoveWeightAdapter(edge);
+                }
+            }
+
+            //Move edge on canvas (Doubleway edges)
+            foreach (Edge edge in doublewayEdges)
+            {
+                MoveFirstPointOfEdge(edge, newPosX, newPosY);
+                Node addressNode = _graphRef.SearchNodeByEdgeAndNode(edge, node);
+                MoveSecondPointOfEdge(edge, addressNode.PosX, addressNode.PosY);
                 MoveWeightAdapter(edge);
             }
         }
         //TODO: Add central positioning
-        private void MoveWeightAdapter(Edge parentEdge)
+        private void MoveWeightAdapter(Edge edge)
         {
-            Canvas.SetLeft(parentEdge.WeightAdapter.VisualAdapter, 
-                ((parentEdge.BaseNode.PosX + parentEdge.AddressNode.PosX) / 2) + (WIDTH / 2) - (parentEdge.WeightAdapter.VisualAdapter.ActualWidth / 2));
-            Canvas.SetTop(parentEdge.WeightAdapter.VisualAdapter, 
-                ((parentEdge.BaseNode.PosY + parentEdge.AddressNode.PosY) / 2) + (WIDTH / 2) - (parentEdge.WeightAdapter.VisualAdapter.ActualHeight / 2));
+            Node baseNode = _graphRef.FindBaseNodeByEdge(edge);
+            Node adressNode = _graphRef.FindAdressNodeByEdge(edge);
+
+            Canvas.SetLeft(edge.WeightAdapter.VisualAdapter, 
+                ((baseNode.PosX + adressNode.PosX) / 2) + (WIDTH / 2) - (edge.WeightAdapter.VisualAdapter.ActualWidth / 2));
+            Canvas.SetTop(edge.WeightAdapter.VisualAdapter, 
+                ((baseNode.PosY + adressNode.PosY) / 2) + (WIDTH / 2) - (edge.WeightAdapter.VisualAdapter.ActualHeight / 2));
         }
         /// <summary>
         /// Change position of first point of edge on canvas
@@ -181,6 +201,21 @@ namespace GraphBuilder
             edge.VisualAdapter.Y2 = newPosY + HEIGHT / 2;
         }
 
+
+        //Search method
+        private List<Edge> SearchDoublewayEdges(List<Edge> baseEdges, List<Edge> addressEdges)
+        {
+            List<Edge> result = new List<Edge>();
+            foreach (Edge edge in baseEdges)
+            {
+                if (addressEdges.Contains(edge))
+                {
+                    result.Add(edge);
+                }
+            }
+
+            return result;
+        }
 
         //Object place methods (On canvas)
         /// <summary>
@@ -300,26 +335,23 @@ namespace GraphBuilder
                     }
                     else
                     {
+                        Edge correctWayEdge = _graphRef.SearchEdgeByNodes(_activatedNode, selectedNode);
+                        Edge reversedEdge = _graphRef.SearchEdgeByNodes(selectedNode, _activatedNode);
+
+                        //if node are equal take off activated and stop execution
                         if (_activatedNode == selectedNode) { TakeOffNodeActivation(); return; }
-                        Edge onewayEdge = _graphRef.SearchEdgeByNodes(selectedNode, _activatedNode);
-
-
-                        //TODO: Correct check
-                        if (onewayEdge != null)
+                        //If edge exists
+                        if (correctWayEdge != null)
                         {
-                            //If edge already doubleway
-                            if (_activatedNode.baseEdges.Contains(onewayEdge) && selectedNode.baseEdges.Contains(onewayEdge))
-                            {
-                                MessageBox.Show("Предлагаемое ребро существует", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
-                            }
-                            else //If alternate trase already exists, remaking him into doubleway
-                            {
-                                //Add reference on edge in address node
-                                onewayEdge.AddressNode.baseEdges.Add(onewayEdge);
-                                onewayEdge.BaseNode.addressEdges.Add(onewayEdge);
-                            }
-                        }
-                        else
+                            MessageBox.Show("Предлагаемое ребро существует");
+                        } else if (reversedEdge != null && correctWayEdge == null) //If edge have only one way
+                        {
+                            _activatedNode.baseEdges.Add(reversedEdge);
+                            selectedNode.addressEdges.Add(reversedEdge);
+                        } else if (reversedEdge != null && correctWayEdge != null) //If edge already doubleway
+                        {
+                            MessageBox.Show("Предлагаемое ребро существует");
+                        } else //If all edges equal null
                         {
                             //Create new edge
                             AddEdge(_activatedNode, selectedNode, 100);
@@ -355,7 +387,7 @@ namespace GraphBuilder
         //Another triggers
         private void WeightTxtBx_TextChanged(object sender, TextChangedEventArgs e)
         {
-            MoveWeightAdapter(_graphRef.FindWeightByAdapterInEdge((TextBox)sender));
+            MoveWeightAdapter(_graphRef.FindEdgeByWeightAdapter((TextBox)sender));
         }
     }
 }
