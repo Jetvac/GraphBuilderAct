@@ -136,7 +136,7 @@ namespace GraphBuilder
             Canvas.SetLeft(node.VisualAdapter, newPosX);
             Canvas.SetTop(node.VisualAdapter, newPosY);
 
-            List<Edge> doublewayEdges = SearchDoublewayEdges(node.baseEdges, node.addressEdges);
+            List<Edge> doublewayEdges = node.doublewayEdges;
 
             //Move edge on canvas (First Position)
             foreach (Edge edge in node.baseEdges)
@@ -164,19 +164,20 @@ namespace GraphBuilder
                 MoveFirstPointOfEdge(edge, newPosX, newPosY);
                 Node addressNode = _graphRef.SearchNodeByEdgeAndNode(edge, node);
                 MoveSecondPointOfEdge(edge, addressNode.PosX, addressNode.PosY);
-                MoveWeightAdapter(edge);
+                MoveWeightAdapter(edge, node, addressNode);
             }
         }
         //TODO: Add central positioning
-        private void MoveWeightAdapter(Edge edge)
+        private void MoveWeightAdapter(Edge edge, Node baseNode = null, Node addressNode = null)
         {
-            Node baseNode = _graphRef.FindBaseNodeByEdge(edge);
-            Node adressNode = _graphRef.FindAdressNodeByEdge(edge);
+            if (baseNode == null) { baseNode = _graphRef.FindBaseNodeByEdge(edge); }
+            if (addressNode == null) { addressNode = _graphRef.FindAdressNodeByEdge(edge); }
 
+            
             Canvas.SetLeft(edge.WeightAdapter.VisualAdapter, 
-                ((baseNode.PosX + adressNode.PosX) / 2) + (WIDTH / 2) - (edge.WeightAdapter.VisualAdapter.ActualWidth / 2));
+                ((baseNode.PosX + addressNode.PosX) / 2) + (WIDTH / 2) - (edge.WeightAdapter.VisualAdapter.ActualWidth / 2));
             Canvas.SetTop(edge.WeightAdapter.VisualAdapter, 
-                ((baseNode.PosY + adressNode.PosY) / 2) + (WIDTH / 2) - (edge.WeightAdapter.VisualAdapter.ActualHeight / 2));
+                ((baseNode.PosY + addressNode.PosY) / 2) + (WIDTH / 2) - (edge.WeightAdapter.VisualAdapter.ActualHeight / 2));
         }
         /// <summary>
         /// Change position of first point of edge on canvas
@@ -201,21 +202,6 @@ namespace GraphBuilder
             edge.VisualAdapter.Y2 = newPosY + HEIGHT / 2;
         }
 
-
-        //Search method
-        private List<Edge> SearchDoublewayEdges(List<Edge> baseEdges, List<Edge> addressEdges)
-        {
-            List<Edge> result = new List<Edge>();
-            foreach (Edge edge in baseEdges)
-            {
-                if (addressEdges.Contains(edge))
-                {
-                    result.Add(edge);
-                }
-            }
-
-            return result;
-        }
 
         //Object place methods (On canvas)
         /// <summary>
@@ -346,8 +332,13 @@ namespace GraphBuilder
                             MessageBox.Show("Предлагаемое ребро существует");
                         } else if (reversedEdge != null && correctWayEdge == null) //If edge have only one way
                         {
-                            _activatedNode.baseEdges.Add(reversedEdge);
-                            selectedNode.addressEdges.Add(reversedEdge);
+                            _activatedNode.addressEdges.Remove(reversedEdge);
+                            selectedNode.baseEdges.Remove(reversedEdge);
+
+                            _activatedNode.doublewayEdges.Add(reversedEdge);
+                            selectedNode.doublewayEdges.Add(reversedEdge);
+
+                            reversedEdge.way = EdgeTypes.Doubleway;
                         } else if (reversedEdge != null && correctWayEdge != null) //If edge already doubleway
                         {
                             MessageBox.Show("Предлагаемое ребро существует");
@@ -387,6 +378,8 @@ namespace GraphBuilder
         //Another triggers
         private void WeightTxtBx_TextChanged(object sender, TextChangedEventArgs e)
         {
+
+            //If doubleway function get additional info
             MoveWeightAdapter(_graphRef.FindEdgeByWeightAdapter((TextBox)sender));
         }
     }

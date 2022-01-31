@@ -19,6 +19,7 @@ namespace GraphBuilder
 
             public Line VisualAdapter { get; set; }
             public Weight WeightAdapter { get; set; }
+            public EdgeTypes way { get; set; } = EdgeTypes.Oneway;
         }
         public class Node
         {
@@ -35,6 +36,7 @@ namespace GraphBuilder
 
             public List<Edge> baseEdges { get; set; } = new List<Edge>();
             public List<Edge> addressEdges { get; set; } = new List<Edge>();
+            public List<Edge> doublewayEdges { get; set; } = new List<Edge>();
         }
         public class Weight
         {
@@ -120,7 +122,7 @@ namespace GraphBuilder
         {
             foreach(Node addressNode in graphNodes)
             {
-                if (addressNode.baseEdges.Contains(edge) && addressNode != baseNode)
+                if (addressNode.doublewayEdges.Contains(edge) && baseNode != addressNode)
                 {
                     return addressNode;
                 }

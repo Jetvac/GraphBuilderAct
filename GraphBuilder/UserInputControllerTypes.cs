@@ -14,4 +14,11 @@ namespace GraphBuilder
         EdgeCreating = 2,
         NodeDelete = 3
     }
+
+    //Define edge way types
+    public enum EdgeTypes 
+    {
+        Oneway = 0,
+        Doubleway = 1
+    }
 }
