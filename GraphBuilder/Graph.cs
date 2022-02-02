@@ -7,23 +7,26 @@ namespace GraphBuilder
 {
     public class Graph
     {
-        private List<Node> graphNodes { get; set; } = new List<Node>();
-        private List<Edge> graphEdges { get; set; } = new List<Edge>();
+        public List<Node> graphNodes { get; set; } = new List<Node>();
+        public List<Edge> graphEdges { get; set; } = new List<Edge>();
 
 
         public class Edge 
         {
-            public Edge(Node baseNode, Node addressNode, Weight weightAdapter)
+            public Edge(int id, Node baseNode, Node addressNode, int weight)
             {
+                ID = id;
                 BaseNode = baseNode;
                 AddressNode = addressNode;
-                WeightAdapter = weightAdapter;
+                Weight = weight;
 
                 //Add dependencies to node
                 baseNode.baseEdges.Add(this);
                 addressNode.addressEdges.Add(this);
             }
 
+            public int ID { get; set; }
+            public int Weight { get; set; }
             public Line VisualAdapter { get; set; }
             public Node BaseNode { get; set; }
             public Node AddressNode { get; set; }
@@ -32,12 +35,15 @@ namespace GraphBuilder
         }
         public class Node
         {
-            public Node(string name, double posX, double posY)
+            public Node(int id, string name, double posX, double posY)
             {
+                ID = id;
                 PosX = posX;
                 PosY = posY;
                 Name = name;
             }
+
+            public int ID { get; set; }
             public string Name { get; set; }
             public Label VisualAdapter { get; set; }
             public double PosX { get; set; }
@@ -59,17 +65,18 @@ namespace GraphBuilder
         }
 
 
-        public Node CreateBaseNode(string name, double posX, double posY)
+        public Node CreateBaseNode(int id, string name, double posX, double posY)
         {
-            Node result = new Node(name, posX, posY);
+            Node result = new Node(id, name, posX, posY);
 
             graphNodes.Add(result);
 
             return result;
         }
-        public Edge CreateBaseEdge(Node baseNode, Node addressNode, Weight weightAdapter)
+        
+        public Edge CreateBaseEdge(int id, Node baseNode, Node addressNode, int weight)
         {
-            Edge result = new Edge(baseNode, addressNode, weightAdapter);
+            Edge result = new Edge(id, baseNode, addressNode, weight);
 
             graphEdges.Add(result);
 
@@ -90,7 +97,15 @@ namespace GraphBuilder
             return removedEdges;
         }
 
-        //Get interface
+        // Data search
+        public Node FindNodeByID(int ID)
+        {
+            return graphNodes.Find(c => c.ID == ID);
+        }
+        public Edge FindEdgeByID(int ID)
+        {
+            return graphEdges.Find(c => c.ID == ID);
+        }
         /// <summary>
         /// Search node in graph list with same visualAdapter signature
         /// </summary>
@@ -114,31 +129,13 @@ namespace GraphBuilder
         /// </summary>
         /// <param name="visualAdapter"></param>
         /// <returns></returns>
-        public Edge FindWeightByAdapterInEdge(TextBox visualAdapter)
+        public Edge FindEdgeByWeightAdapter(TextBox visualAdapter)
         {
             return graphEdges.FirstOrDefault(c => c.WeightAdapter.VisualAdapter == visualAdapter);
         }
         public Edge SearchEdgeByNodes(Node baseNode, Node addressNode)
         {
             return graphEdges.FirstOrDefault(c => c.BaseNode == baseNode && c.AddressNode == addressNode);
-        }
-        /// <summary>
-        /// Return node from list by given position
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public Node GetNodeById(int id)
-        {
-            return graphNodes[id];
-        }
-        /// <summary>
-        /// Return edge from list by given position
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public Edge GetEdgeById(int id)
-        {
-            return graphEdges[id];
         }
     }
 }

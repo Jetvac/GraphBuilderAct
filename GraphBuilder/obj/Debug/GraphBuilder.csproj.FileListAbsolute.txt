@@ -49,3 +49,10 @@ C:\Users\edrum\Documents\GitHub\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder
 C:\Users\edrum\Documents\GitHub\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder.pdb
 C:\Users\edrum\Documents\GitHub\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder.csproj.AssemblyReference.cache
 C:\Users\edrum\Documents\GitHub\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder.csproj.SuggestedBindingRedirects.cache
+C:\Users\edrum\Documents\GitHub\GraphBuilderAct\GraphBuilder\bin\Debug\EntityFramework.dll
+C:\Users\edrum\Documents\GitHub\GraphBuilderAct\GraphBuilder\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\edrum\Documents\GitHub\GraphBuilderAct\GraphBuilder\bin\Debug\EntityFramework.xml
+C:\Users\edrum\Documents\GitHub\GraphBuilderAct\GraphBuilder\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\edrum\Documents\GitHub\GraphBuilderAct\GraphBuilder\bin\Debug\ru\EntityFramework.resources.dll
+C:\Users\edrum\Documents\GitHub\GraphBuilderAct\GraphBuilder\obj\Debug\GraphBuilder_Content.g.cs
+C:\Users\edrum\Documents\GitHub\GraphBuilderAct\GraphBuilder\obj\Debug\GraphBuilder.csproj.CopyComplete

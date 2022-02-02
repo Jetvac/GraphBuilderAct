@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="LP04Model" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+  <EntityContainer Name="LP04Entities" annotation:LazyLoadingEnabled="true">
+    <EntitySet Name="GraphEdge" EntityType="LP04Model.GraphEdge" />
+    <EntitySet Name="GraphNode" EntityType="LP04Model.GraphNode" />
+    <EntitySet Name="GraphStructure" EntityType="LP04Model.GraphStructure" />
+    <AssociationSet Name="FK__GraphEdge__Addre__2A4B4B5E" Association="LP04Model.FK__GraphEdge__Addre__2A4B4B5E">
+      <End Role="GraphNode" EntitySet="GraphNode" />
+      <End Role="GraphEdge" EntitySet="GraphEdge" />
+    </AssociationSet>
+    <AssociationSet Name="FK__GraphEdge__BaseN__29572725" Association="LP04Model.FK__GraphEdge__BaseN__29572725">
+      <End Role="GraphNode" EntitySet="GraphNode" />
+      <End Role="GraphEdge" EntitySet="GraphEdge" />
+    </AssociationSet>
+    <AssociationSet Name="FK__GraphEdge__Graph__2B3F6F97" Association="LP04Model.FK__GraphEdge__Graph__2B3F6F97">
+      <End Role="GraphStructure" EntitySet="GraphStructure" />
+      <End Role="GraphEdge" EntitySet="GraphEdge" />
+    </AssociationSet>
+    <AssociationSet Name="FK__GraphNode__Graph__267ABA7A" Association="LP04Model.FK__GraphNode__Graph__267ABA7A">
+      <End Role="GraphStructure" EntitySet="GraphStructure" />
+      <End Role="GraphNode" EntitySet="GraphNode" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="GraphEdge">
+    <Key>
+      <PropertyRef Name="EdgeID" />
+    </Key>
+    <Property Name="EdgeID" Type="Int32" Nullable="false" />
+    <Property Name="BaseNodeID" Type="Int32" Nullable="false" />
+    <Property Name="AddressNodeID" Type="Int32" Nullable="false" />
+    <Property Name="GraphID" Type="Int32" Nullable="false" />
+    <Property Name="Weight" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="GraphNode" Relationship="LP04Model.FK__GraphEdge__Addre__2A4B4B5E" FromRole="GraphEdge" ToRole="GraphNode" />
+    <NavigationProperty Name="GraphNode1" Relationship="LP04Model.FK__GraphEdge__BaseN__29572725" FromRole="GraphEdge" ToRole="GraphNode" />
+    <NavigationProperty Name="GraphStructure" Relationship="LP04Model.FK__GraphEdge__Graph__2B3F6F97" FromRole="GraphEdge" ToRole="GraphStructure" />
+  </EntityType>
+  <EntityType Name="GraphNode">
+    <Key>
+      <PropertyRef Name="NodeID" />
+    </Key>
+    <Property Name="NodeID" Type="Int32" Nullable="false" />
+    <Property Name="PosX" Type="Double" Nullable="false" />
+    <Property Name="PosY" Type="Double" Nullable="false" />
+    <Property Name="GraphID" Type="Int32" Nullable="false" />
+    <Property Name="Name" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+    <Property Name="Abbreviation" Type="String" Nullable="false" MaxLength="4" FixedLength="true" Unicode="true" />
+    <NavigationProperty Name="GraphEdge" Relationship="LP04Model.FK__GraphEdge__Addre__2A4B4B5E" FromRole="GraphNode" ToRole="GraphEdge" />
+    <NavigationProperty Name="GraphEdge1" Relationship="LP04Model.FK__GraphEdge__BaseN__29572725" FromRole="GraphNode" ToRole="GraphEdge" />
+    <NavigationProperty Name="GraphStructure" Relationship="LP04Model.FK__GraphNode__Graph__267ABA7A" FromRole="GraphNode" ToRole="GraphStructure" />
+  </EntityType>
+  <EntityType Name="GraphStructure">
+    <Key>
+      <PropertyRef Name="GraphID" />
+    </Key>
+    <Property Name="GraphID" Type="Int32" Nullable="false" />
+    <Property Name="Name" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+    <NavigationProperty Name="GraphEdge" Relationship="LP04Model.FK__GraphEdge__Graph__2B3F6F97" FromRole="GraphStructure" ToRole="GraphEdge" />
+    <NavigationProperty Name="GraphNode" Relationship="LP04Model.FK__GraphNode__Graph__267ABA7A" FromRole="GraphStructure" ToRole="GraphNode" />
+  </EntityType>
+  <Association Name="FK__GraphEdge__Addre__2A4B4B5E">
+    <End Type="LP04Model.GraphNode" Role="GraphNode" Multiplicity="1" />
+    <End Type="LP04Model.GraphEdge" Role="GraphEdge" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="GraphNode">
+        <PropertyRef Name="NodeID" />
+      </Principal>
+      <Dependent Role="GraphEdge">
+        <PropertyRef Name="AddressNodeID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK__GraphEdge__BaseN__29572725">
+    <End Type="LP04Model.GraphNode" Role="GraphNode" Multiplicity="1" />
+    <End Type="LP04Model.GraphEdge" Role="GraphEdge" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="GraphNode">
+        <PropertyRef Name="NodeID" />
+      </Principal>
+      <Dependent Role="GraphEdge">
+        <PropertyRef Name="BaseNodeID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK__GraphEdge__Graph__2B3F6F97">
+    <End Type="LP04Model.GraphStructure" Role="GraphStructure" Multiplicity="1" />
+    <End Type="LP04Model.GraphEdge" Role="GraphEdge" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="GraphStructure">
+        <PropertyRef Name="GraphID" />
+      </Principal>
+      <Dependent Role="GraphEdge">
+        <PropertyRef Name="GraphID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK__GraphNode__Graph__267ABA7A">
+    <End Type="LP04Model.GraphStructure" Role="GraphStructure" Multiplicity="1" />
+    <End Type="LP04Model.GraphNode" Role="GraphNode" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="GraphStructure">
+        <PropertyRef Name="GraphID" />
+      </Principal>
+      <Dependent Role="GraphNode">
+        <PropertyRef Name="GraphID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema>

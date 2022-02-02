@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="Хранилище LP04ModelContainer" CdmEntityContainer="LP04Entities">
+    <EntitySetMapping Name="GraphEdge">
+      <EntityTypeMapping TypeName="LP04Model.GraphEdge">
+        <MappingFragment StoreEntitySet="GraphEdge">
+          <ScalarProperty Name="Weight" ColumnName="Weight" />
+          <ScalarProperty Name="GraphID" ColumnName="GraphID" />
+          <ScalarProperty Name="AddressNodeID" ColumnName="AddressNodeID" />
+          <ScalarProperty Name="BaseNodeID" ColumnName="BaseNodeID" />
+          <ScalarProperty Name="EdgeID" ColumnName="EdgeID" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="GraphNode">
+      <EntityTypeMapping TypeName="LP04Model.GraphNode">
+        <MappingFragment StoreEntitySet="GraphNode">
+          <ScalarProperty Name="Abbreviation" ColumnName="Abbreviation" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="GraphID" ColumnName="GraphID" />
+          <ScalarProperty Name="PosY" ColumnName="PosY" />
+          <ScalarProperty Name="PosX" ColumnName="PosX" />
+          <ScalarProperty Name="NodeID" ColumnName="NodeID" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="GraphStructure">
+      <EntityTypeMapping TypeName="LP04Model.GraphStructure">
+        <MappingFragment StoreEntitySet="GraphStructure">
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="GraphID" ColumnName="GraphID" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+  </EntityContainerMapping>
+</Mapping>

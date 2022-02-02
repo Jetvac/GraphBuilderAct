@@ -11,9 +11,29 @@
             <ColumnDefinition/>
             <ColumnDefinition Width="200"/>
         </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Menu Grid.ColumnSpan="2">
+            <MenuItem Header="Файл">
+                <MenuItem Header="Создать новый проект" Click="NewProject_Click"/>
+                <MenuItem Header="Открыть">
+                    <ListView x:Name="GraphProject" Background="Transparent" BorderThickness="0" SelectionChanged="GraphProject_SelectionChanged">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Проекты:" HeaderContainerStyle="{DynamicResource emptyHeaderLV}" DisplayMemberBinding="{Binding Name}"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </MenuItem>
+            </MenuItem>
+        </Menu>
         
         <!-- Logical element that using for drawing node and edge -->
-        <Border x:Name="GraphicRender" Background="White" MouseLeftButtonDown="Grid_MouseLeftButtonDown">
+        <Border Grid.Row="1" x:Name="GraphicRender" Background="White" MouseLeftButtonDown="Grid_MouseLeftButtonDown">
             <Grid>
                 <!-- First render layer -->
                 <Canvas x:Name="EdgeRender">
@@ -27,12 +47,21 @@
             </Grid>
         </Border>
 
-        <Border Grid.Column="1" Background="AliceBlue" BorderThickness="2 0 0 0" BorderBrush="LightBlue">
+        <Border Grid.Row="1" Grid.Column="1" Background="AliceBlue" BorderThickness="2 0 0 0" BorderBrush="LightBlue">
             <StackPanel x:Name="UserActiveController" VerticalAlignment="Top">
-                <Button x:Name="AddNodeSwitch" Margin="5" Grid.Row="0" Click="AddNodeSwitch_Click">Добавить узел</Button>
-                <Button x:Name="DeleteNodeSwitch" Margin="5" Grid.Row="2" Click="DeleteNodeSwitch_Click">Удалить узел</Button>
-                <Button x:Name="AddEdgeSwitch" Margin="5" Grid.Row="1" Click="AddEdgeSwitch_Click">Соединить вершины</Button>
-                <Button x:Name="DefaultModeSwitch" Margin="5" Grid.Row="2" Click="DefaultModeSwitch_Click">По умолчанию</Button>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="55"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock x:Name="SelectGraph" Margin="5">Проект:</TextBlock>
+                    <TextBox Grid.Column="1" x:Name="GraphName" Margin="5" TextChanged="GraphName_TextChanged"/>
+                </Grid>
+                <Button x:Name="AddNodeSwitch" Margin="5" Click="AddNodeSwitch_Click">Добавить узел</Button>
+                <Button x:Name="DeleteNodeSwitch" Margin="5" Click="DeleteNodeSwitch_Click">Удалить узел</Button>
+                <Button x:Name="AddEdgeSwitch" Margin="5" Click="AddEdgeSwitch_Click">Соединить вершины</Button>
+                <Button x:Name="DefaultModeSwitch" Margin="5" Click="DefaultModeSwitch_Click">По умолчанию</Button>
             </StackPanel>
         </Border>
     </Grid>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="b2fb81c6efcf4754830021391422f79c" Name="Diagram1">
+        <EntityTypeShape EntityType="LP04Model.GraphEdge" Width="1.5" PointX="5.25" PointY="2.875" />
+        <EntityTypeShape EntityType="LP04Model.GraphNode" Width="1.5" PointX="3" PointY="2.75" />
+        <EntityTypeShape EntityType="LP04Model.GraphStructure" Width="1.5" PointX="0.75" PointY="3.25" />
+        <AssociationConnector Association="LP04Model.FK__GraphEdge__Addre__2A4B4B5E" />
+        <AssociationConnector Association="LP04Model.FK__GraphEdge__BaseN__29572725" />
+        <AssociationConnector Association="LP04Model.FK__GraphEdge__Graph__2B3F6F97" />
+        <AssociationConnector Association="LP04Model.FK__GraphNode__Graph__267ABA7A" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
