@@ -31,9 +31,7 @@ namespace GraphBuilder
             _nodeLayer = nodeLayer;
             _weightLayer = weightLayer;
 
-            _edgeLayer.Children.Clear();
-            _nodeLayer.Children.Clear();
-            _weightLayer.Children.Clear();
+            ClearCanvas();
 
             _graphRef = graph;
             InitializeGraphStructure(_graphRef);
@@ -106,6 +104,7 @@ namespace GraphBuilder
         {
             TextBox visualAdapter = new TextBox() { Text = weight.ToString() };
             visualAdapter.TextChanged += WeightTxtBx_TextChanged;
+            visualAdapter.PreviewTextInput += WeightTxtBx_PreviewTextInput;
             Weight result = new Weight(weight, visualAdapter);
 
             return result;
@@ -145,7 +144,15 @@ namespace GraphBuilder
         {
             _weightLayer.Children.Remove(parent.WeightAdapter.VisualAdapter);
         }
-
+        /// <summary>
+        /// Delete all children in canvas
+        /// </summary>
+        public void ClearCanvas()
+        {
+            _edgeLayer.Children.Clear();
+            _nodeLayer.Children.Clear();
+            _weightLayer.Children.Clear();
+        }
 
         //Object positioning methods
         /// <summary>
@@ -336,6 +343,7 @@ namespace GraphBuilder
                         {
                             // There is used static variable from main class
                             Edge edge = MainWindow.dbController.CreateEdge(_activatedNode, selectedNode, 0);
+                            if (edge == null) { return; }
                             InitializeEdgeGraphic(edge);
                         } else
                         {
@@ -375,11 +383,29 @@ namespace GraphBuilder
         //Another triggers
         private void WeightTxtBx_TextChanged(object sender, TextChangedEventArgs e)
         {
+            TextBox current = (TextBox)sender;
+            if (current.Text.Length == 0) { current.Text = "0"; }
+
+            int weight = 0;
+
+            try
+            {
+                weight = Convert.ToInt32(((TextBox)sender).Text);
+            } catch (Exception ex)
+            {
+                current.Text = "0";
+                return;
+            }
+
             Edge edge = _graphRef.FindEdgeByWeightAdapter((TextBox)sender);
             // There is used static variable from main class
-            MainWindow.dbController.ChangeEdgeWeightValue(edge, Convert.ToInt32(((TextBox)sender).Text));
+            MainWindow.dbController.ChangeEdgeWeightValue(edge, weight);
 
             MoveWeightAdapter(edge);
+        }
+        private void WeightTxtBx_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = "0123456789".IndexOf(e.Text) < 0;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,16 +13,22 @@ namespace GraphBuilder
     {
         private Graph _graphRef { get; set; }
         private LP04Entities _lpConnection { get; set; } = new LP04Entities();
-        private GraphStructure _dbGraph { get; set; }
+        public int _structureID { get; set; }
         // Define an ammount of created node and edges by seance
 
         public DBController(string name, GraphStructure usingGraphSpace = null)
         {
-            if (usingGraphSpace != null) { _dbGraph = usingGraphSpace; }
+            if (usingGraphSpace != null) { _structureID = usingGraphSpace.GraphID; }
             else {
-                int graphID = _lpConnection.GraphStructure.Count() + 1;
-                _dbGraph = new GraphStructure() { GraphID = graphID, Name = name };
-                _lpConnection.GraphStructure.Add(_dbGraph);
+                int graphID = 0;
+                if (!(_lpConnection.GraphStructure.Count() == 0))
+                {
+                    graphID = _lpConnection.GraphStructure.Select(c => c.GraphID).Max() + 1;
+                }
+                _structureID = graphID;
+                GraphStructure newGraph = new GraphStructure() { GraphID = graphID, Name = name };
+                _lpConnection.GraphStructure.Add(newGraph);
+                SaveChanges();
             }
 
             InitializeGraph();
@@ -33,13 +40,14 @@ namespace GraphBuilder
         private void InitializeGraph()
         {
             _graphRef = new Graph();
+            GraphStructure graphStructure = _lpConnection.GraphStructure.FirstOrDefault(c => c.GraphID == _structureID);
 
-            foreach (GraphNode node in _dbGraph.GraphNode)
+            foreach (GraphNode node in graphStructure.GraphNode)
             {
                 _graphRef.CreateBaseNode(node.NodeID, node.Name, node.PosX, node.PosY);
             }
 
-            foreach (GraphEdge edge in _dbGraph.GraphEdge)
+            foreach (GraphEdge edge in graphStructure.GraphEdge)
             {
                 Node baseNode = _graphRef.FindNodeByID(edge.BaseNodeID);
                 Node adressNode = _graphRef.FindNodeByID(edge.AddressNodeID);
@@ -52,7 +60,7 @@ namespace GraphBuilder
         // Database manipulate methods
         public void ChangeGraphName(string newName)
         {
-            _dbGraph.Name = newName;
+            _lpConnection.GraphStructure.FirstOrDefault(c => c.GraphID == _structureID).Name = newName;
             SaveChanges();
         }
         /// <summary>
@@ -66,17 +74,24 @@ namespace GraphBuilder
         public Node CreateNode(string nodeName, double posX, double posY)
         {
             // Create node in base
-            int newNodeID = _lpConnection.GraphNode.Count() + 1;
+            int newNodeID = 0;
+            if (!(_lpConnection.GraphNode.Count() == 0))
+            {
+                newNodeID = _lpConnection.GraphNode.Select(c => c.NodeID).Max() + 1;
+            }
 
-            GraphNode newNode = new GraphNode { GraphID = _dbGraph.GraphID, NodeID = newNodeID, Name = nodeName, PosX = posX, PosY = posY, Abbreviation = "" };
-            _dbGraph.GraphNode.Add(newNode);
+
+                GraphNode newNode = new GraphNode { GraphID = _structureID, NodeID = newNodeID, Name = nodeName, PosX = posX, PosY = posY, Abbreviation = "" };
             _lpConnection.GraphNode.Add(newNode);
 
-            SaveChanges();
+            if (SaveChanges())
+            {
+                // Initialize logic element
+                Node node = _graphRef.CreateBaseNode(newNode.NodeID, nodeName, posX, posY);
+                return node;
+            }
 
-            // Initialize logic element
-            Node node = _graphRef.CreateBaseNode(newNode.NodeID, nodeName, posX, posY);
-            return node;
+            return null;
         }
         /// <summary>
         /// Create new edge in database and return result
@@ -88,17 +103,23 @@ namespace GraphBuilder
         public Edge CreateEdge(Node baseNode, Node adressNode, int weight)
         {
             // Create edge in base
-            int newEdgeID = _lpConnection.GraphEdge.Count() + 1;
+            int newEdgeID = 0;
+            if (!(_lpConnection.GraphEdge.Count() == 0))
+            {
+                newEdgeID = _lpConnection.GraphEdge.Select(c => c.EdgeID).Max() + 1;
+            }
 
-            GraphEdge newEdge = new GraphEdge { GraphID = _dbGraph.GraphID, EdgeID = newEdgeID, BaseNodeID = baseNode.ID, AddressNodeID = adressNode.ID };
-            _dbGraph.GraphEdge.Add(newEdge);
+            GraphEdge newEdge = new GraphEdge { GraphID = _structureID, EdgeID = newEdgeID, BaseNodeID = baseNode.ID, AddressNodeID = adressNode.ID };
             _lpConnection.GraphEdge.Add(newEdge);
 
-            SaveChanges();
+            if (SaveChanges())
+            {
+                // Initialize logic element
+                Edge edge = _graphRef.CreateBaseEdge(newEdge.EdgeID, baseNode, adressNode, weight);
+                return edge;
+            }
 
-            // Initialize logic element
-            Edge edge = _graphRef.CreateBaseEdge(newEdge.EdgeID, baseNode, adressNode, weight);
-            return edge;
+            return null;
         }
         /// <summary>
         /// Remove node and related edge from database
@@ -106,14 +127,11 @@ namespace GraphBuilder
         /// <param name="node"></param>
         public void DeleteNode(Node node)
         {
-            GraphNode graphNode = _dbGraph.GraphNode.FirstOrDefault(c => c.NodeID == node.ID);
-            List<GraphEdge> relatedEdge = _dbGraph.GraphEdge.Where(c => c.BaseNodeID == graphNode.NodeID || c.AddressNodeID == graphNode.NodeID).ToList();
+            GraphNode graphNode = _lpConnection.GraphNode.FirstOrDefault(c => c.NodeID == node.ID);
+            List<GraphEdge> relatedEdge = _lpConnection.GraphEdge.Where(c => c.BaseNodeID == graphNode.NodeID || c.AddressNodeID == graphNode.NodeID).ToList();
 
-
-            // Почему-то не удаляет (Выдаёт ошибку)
-            foreach (GraphEdge edge in relatedEdge) { _lpConnection.GraphEdge.Remove(edge); _dbGraph.GraphEdge.Remove(edge); }
+            foreach (GraphEdge edge in relatedEdge) { _lpConnection.GraphEdge.Remove(edge); }
             _lpConnection.GraphNode.Remove(graphNode);
-            _dbGraph.GraphNode.Remove(graphNode);
             
             SaveChanges();
         }
@@ -124,31 +142,50 @@ namespace GraphBuilder
         /// <param name="value"></param>
         public void ChangeEdgeWeightValue(Edge edge, int value)
         {
-            GraphEdge data = _dbGraph.GraphEdge.FirstOrDefault(c => c.EdgeID == edge.ID);
+            GraphEdge data = _lpConnection.GraphEdge.FirstOrDefault(c => c.EdgeID == edge.ID);
             data.Weight = value;
+            SaveChanges();
         }
         public void MoveNode(Node node, double newPosX, double newPosY)
         {
-            // Позиция не изменяется
             GraphNode moved = _lpConnection.GraphNode.FirstOrDefault(c => c.NodeID == node.ID);
             moved.PosX = newPosX;
             moved.PosY = newPosY;
             SaveChanges();
+        }
+        public bool DeleteProject()
+        {
+            try
+            {
+                List<GraphEdge> deletedEdges = _lpConnection.GraphEdge.Where(c => c.GraphID == _structureID).ToList();
+                List<GraphNode> deletedNodes = _lpConnection.GraphNode.Where(c => c.GraphID == _structureID).ToList();
+                foreach (GraphEdge edge in deletedEdges) { _lpConnection.GraphEdge.Remove(edge); }
+                foreach (GraphNode node in deletedNodes) { _lpConnection.GraphNode.Remove(node); }
+
+                _lpConnection.GraphStructure.Remove(_lpConnection.GraphStructure.FirstOrDefault(c => c.GraphID == _structureID));
+                SaveChanges();
+            } catch (Exception ex)
+            {
+                return false;
+            }
+            return true;
         }
 
         // Base contact methods
         /// <summary>
         /// Save changes in data base
         /// </summary>
-        private void SaveChanges()
+        private bool SaveChanges()
         {
             try
             {
                 _lpConnection.SaveChanges();
+                return true;
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Возникла ошибка в процессе сохранения.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
             }
         }
 

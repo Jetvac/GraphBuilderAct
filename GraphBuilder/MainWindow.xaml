@@ -48,21 +48,27 @@
         </Border>
 
         <Border Grid.Row="1" Grid.Column="1" Background="AliceBlue" BorderThickness="2 0 0 0" BorderBrush="LightBlue">
-            <StackPanel x:Name="UserActiveController" VerticalAlignment="Top">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="55"/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    
-                    <TextBlock x:Name="SelectGraph" Margin="5">Проект:</TextBlock>
-                    <TextBox Grid.Column="1" x:Name="GraphName" Margin="5" TextChanged="GraphName_TextChanged"/>
-                </Grid>
-                <Button x:Name="AddNodeSwitch" Margin="5" Click="AddNodeSwitch_Click">Добавить узел</Button>
-                <Button x:Name="DeleteNodeSwitch" Margin="5" Click="DeleteNodeSwitch_Click">Удалить узел</Button>
-                <Button x:Name="AddEdgeSwitch" Margin="5" Click="AddEdgeSwitch_Click">Соединить вершины</Button>
-                <Button x:Name="DefaultModeSwitch" Margin="5" Click="DefaultModeSwitch_Click">По умолчанию</Button>
-            </StackPanel>
+            <Grid>
+                <StackPanel x:Name="UserActiveController" VerticalAlignment="Top">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="55"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock x:Name="SelectGraph" Margin="5">Проект:</TextBlock>
+                        <TextBox Grid.Column="1" x:Name="GraphName" Margin="5" TextChanged="GraphName_TextChanged"/>
+                    </Grid>
+                    <Button x:Name="AddNodeSwitch" Margin="5" Click="AddNodeSwitch_Click" ToolTip="Создаёт вершину и помещает её на поле">Добавить вершину</Button>
+                    <Button x:Name="DeleteNodeSwitch" Margin="5" Click="DeleteNodeSwitch_Click" ToolTip="Удаляет вершину и связанные с ней рёбра">Удалить вершину</Button>
+                    <Button x:Name="AddEdgeSwitch" Margin="5" Click="AddEdgeSwitch_Click" ToolTip="Создаёт маршрут между домами">Соединить вершины</Button>
+                    <Button x:Name="DefaultModeSwitch" Margin="5" Click="DefaultModeSwitch_Click" ToolTip="Режим перемещения вершин">По умолчанию</Button>
+                </StackPanel>
+
+                <StackPanel Orientation="Vertical" VerticalAlignment="Bottom">
+                    <Button x:Name="DeleteProject" Margin="5" Click="DeleteProject_Click" Background="IndianRed">Удалить проект</Button>
+                </StackPanel>
+            </Grid>
         </Border>
     </Grid>
 </Window>
