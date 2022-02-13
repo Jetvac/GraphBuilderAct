@@ -35,12 +35,13 @@ namespace GraphBuilder
         }
         public class Node
         {
-            public Node(int id, string name, double posX, double posY)
+            public Node(int id, string name, double posX, double posY, string abbreviation)
             {
                 ID = id;
                 PosX = posX;
                 PosY = posY;
                 Name = name;
+                Abbreviation = abbreviation;
             }
 
             public int ID { get; set; }
@@ -48,6 +49,7 @@ namespace GraphBuilder
             public Label VisualAdapter { get; set; }
             public double PosX { get; set; }
             public double PosY { get; set; }
+            public string Abbreviation { get; set; }
 
             public List<Edge> baseEdges { get; set; } = new List<Edge>();
             public List<Edge> addressEdges { get; set; } = new List<Edge>();
@@ -65,9 +67,9 @@ namespace GraphBuilder
         }
 
 
-        public Node CreateBaseNode(int id, string name, double posX, double posY)
+        public Node CreateBaseNode(int id, string name, double posX, double posY, string abbreviation)
         {
-            Node result = new Node(id, name, posX, posY);
+            Node result = new Node(id, name, posX, posY, abbreviation);
 
             graphNodes.Add(result);
 
@@ -95,6 +97,10 @@ namespace GraphBuilder
             graphNodes.Remove(node);
 
             return removedEdges;
+        }
+        public void RemoveEdge(Edge edge)
+        {
+            graphEdges.Remove(edge);
         }
 
         // Data search
@@ -136,6 +142,16 @@ namespace GraphBuilder
         public Edge SearchEdgeByNodes(Node baseNode, Node addressNode)
         {
             return graphEdges.FirstOrDefault(c => c.BaseNode == baseNode && c.AddressNode == addressNode);
+        }
+        /// <summary>
+        /// Search edge by two point (without direction)
+        /// </summary>
+        /// <param name="first"></param>
+        /// <param name="second"></param>
+        /// <returns></returns>
+        public Edge SearchEdgeNonStraightedByNodes(Node first, Node second)
+        {
+            return graphEdges.FirstOrDefault(c => (c.BaseNode == first && c.AddressNode == second) || (c.BaseNode == second && c.AddressNode == first));
         }
     }
 }

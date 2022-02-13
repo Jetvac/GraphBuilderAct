@@ -32,5 +32,17 @@
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
+    <FunctionImportMapping FunctionImportName="MinPath" FunctionName="Хранилище LP04Model.MinPath" />
+    <EntitySetMapping Name="MarkedNodeList">
+      <EntityTypeMapping TypeName="LP04Model.MarkedNodeList">
+        <MappingFragment StoreEntitySet="MarkedNodeList">
+          <ScalarProperty Name="PrevNode" ColumnName="PrevNode" />
+          <ScalarProperty Name="DistFromStart" ColumnName="DistFromStart" />
+          <ScalarProperty Name="Marked" ColumnName="Marked" />
+          <ScalarProperty Name="NodeID" ColumnName="NodeID" />
+          <ScalarProperty Name="ID" ColumnName="ID" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
   </EntityContainerMapping>
 </Mapping>

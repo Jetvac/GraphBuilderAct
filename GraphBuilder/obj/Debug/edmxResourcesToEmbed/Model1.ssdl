@@ -28,6 +28,18 @@
     <Property Name="GraphID" Type="int" Nullable="false" />
     <Property Name="Name" Type="nvarchar(max)" Nullable="false" />
   </EntityType>
+  <!--Ошибки, обнаруженные при создании:
+предупреждение 6002: В таблице или представлении "LP04.dbo.MarkedNodeList" не определен первичный ключ. Ключ был выведен, а определение таблицы или представления было создано в режиме только для чтения.-->
+  <EntityType Name="MarkedNodeList">
+    <Key>
+      <PropertyRef Name="ID" />
+    </Key>
+    <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="NodeID" Type="int" />
+    <Property Name="Marked" Type="bit" />
+    <Property Name="DistFromStart" Type="int" />
+    <Property Name="PrevNode" Type="int" />
+  </EntityType>
   <Association Name="FK__GraphEdge__Addre__2A4B4B5E">
     <End Role="GraphNode" Type="Self.GraphNode" Multiplicity="1" />
     <End Role="GraphEdge" Type="Self.GraphEdge" Multiplicity="*" />
@@ -76,10 +88,23 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
+  <Function Name="MinPath" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="BasePointNodeID" Type="int" Mode="In" />
+    <Parameter Name="AddressPointNodeID" Type="int" Mode="In" />
+  </Function>
   <EntityContainer Name="Хранилище LP04ModelContainer">
     <EntitySet Name="GraphEdge" EntityType="Self.GraphEdge" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="GraphNode" EntityType="Self.GraphNode" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="GraphStructure" EntityType="Self.GraphStructure" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="MarkedNodeList" EntityType="Self.MarkedNodeList" store:Type="Tables" store:Schema="dbo">
+      <DefiningQuery>SELECT 
+    [MarkedNodeList].[ID] AS [ID], 
+    [MarkedNodeList].[NodeID] AS [NodeID], 
+    [MarkedNodeList].[Marked] AS [Marked], 
+    [MarkedNodeList].[DistFromStart] AS [DistFromStart], 
+    [MarkedNodeList].[PrevNode] AS [PrevNode]
+    FROM [dbo].[MarkedNodeList] AS [MarkedNodeList]</DefiningQuery>
+    </EntitySet>
     <AssociationSet Name="FK__GraphEdge__Addre__2A4B4B5E" Association="Self.FK__GraphEdge__Addre__2A4B4B5E">
       <End Role="GraphNode" EntitySet="GraphNode" />
       <End Role="GraphEdge" EntitySet="GraphEdge" />

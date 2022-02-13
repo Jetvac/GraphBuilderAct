@@ -44,7 +44,7 @@ namespace GraphBuilder
 
             foreach (GraphNode node in graphStructure.GraphNode)
             {
-                _graphRef.CreateBaseNode(node.NodeID, node.Name, node.PosX, node.PosY);
+                _graphRef.CreateBaseNode(node.NodeID, node.Name, node.PosX, node.PosY, node.Abbreviation);
             }
 
             foreach (GraphEdge edge in graphStructure.GraphEdge)
@@ -63,6 +63,17 @@ namespace GraphBuilder
             _lpConnection.GraphStructure.FirstOrDefault(c => c.GraphID == _structureID).Name = newName;
             SaveChanges();
         }
+        public void ChangeNodeName(int nodeID, string newName)
+        {
+            _lpConnection.GraphNode.FirstOrDefault(c => c.NodeID == nodeID).Name = newName;
+            SaveChanges();
+        }
+
+        public void ChangeNodeAbbreviation(int nodeID, string abbreviation)
+        {
+            _lpConnection.GraphNode.FirstOrDefault(c => c.NodeID == nodeID).Abbreviation = abbreviation;
+            SaveChanges();
+        }
         /// <summary>
         /// Create new node in database and return result
         /// </summary>
@@ -71,7 +82,7 @@ namespace GraphBuilder
         /// <param name="posX"></param>
         /// <param name="posY"></param>
         /// <returns></returns>
-        public Node CreateNode(string nodeName, double posX, double posY)
+        public Node CreateNode(string nodeName, double posX, double posY, string abbreviation)
         {
             // Create node in base
             int newNodeID = 0;
@@ -81,13 +92,13 @@ namespace GraphBuilder
             }
 
 
-                GraphNode newNode = new GraphNode { GraphID = _structureID, NodeID = newNodeID, Name = nodeName, PosX = posX, PosY = posY, Abbreviation = "" };
+            GraphNode newNode = new GraphNode { GraphID = _structureID, NodeID = newNodeID, Name = nodeName, PosX = posX, PosY = posY, Abbreviation = abbreviation };
             _lpConnection.GraphNode.Add(newNode);
 
             if (SaveChanges())
             {
                 // Initialize logic element
-                Node node = _graphRef.CreateBaseNode(newNode.NodeID, nodeName, posX, posY);
+                Node node = _graphRef.CreateBaseNode(newNode.NodeID, nodeName, posX, posY, abbreviation);
                 return node;
             }
 
@@ -135,11 +146,17 @@ namespace GraphBuilder
             
             SaveChanges();
         }
+        public void DeleteEdge(Edge edge)
+        {
+            GraphEdge graphEdge = _lpConnection.GraphEdge.FirstOrDefault(c => c.EdgeID == edge.ID);
+            _lpConnection.GraphEdge.Remove(graphEdge);
+            SaveChanges();
+        }
         /// <summary>
-        /// Change edge weight value in database
-        /// </summary>
-        /// <param name="edge"></param>
-        /// <param name="value"></param>
+            /// Change edge weight value in database
+            /// </summary>
+            /// <param name="edge"></param>
+            /// <param name="value"></param>
         public void ChangeEdgeWeightValue(Edge edge, int value)
         {
             GraphEdge data = _lpConnection.GraphEdge.FirstOrDefault(c => c.EdgeID == edge.ID);
@@ -180,6 +197,8 @@ namespace GraphBuilder
             try
             {
                 _lpConnection.SaveChanges();
+                _lpConnection = new LP04Entities();
+                MainWindow.dbConnection = new LP04Entities();
                 return true;
             }
             catch (Exception ex)

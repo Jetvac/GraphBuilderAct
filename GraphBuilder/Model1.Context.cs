@@ -12,6 +12,8 @@ namespace GraphBuilder
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
+    using System.Data.Entity.Core.Objects;
+    using System.Linq;
     
     public partial class LP04Entities : DbContext
     {
@@ -28,5 +30,32 @@ namespace GraphBuilder
         public virtual DbSet<GraphEdge> GraphEdge { get; set; }
         public virtual DbSet<GraphNode> GraphNode { get; set; }
         public virtual DbSet<GraphStructure> GraphStructure { get; set; }
+        public virtual DbSet<MarkedNodeList> MarkedNodeList { get; set; }
+    
+        public virtual ObjectResult<MarkedNodeList> MinPath(Nullable<int> basePointNodeID, Nullable<int> addressPointNodeID)
+        {
+            var basePointNodeIDParameter = basePointNodeID.HasValue ?
+                new ObjectParameter("BasePointNodeID", basePointNodeID) :
+                new ObjectParameter("BasePointNodeID", typeof(int));
+    
+            var addressPointNodeIDParameter = addressPointNodeID.HasValue ?
+                new ObjectParameter("AddressPointNodeID", addressPointNodeID) :
+                new ObjectParameter("AddressPointNodeID", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<MarkedNodeList>("MinPath", basePointNodeIDParameter, addressPointNodeIDParameter);
+        }
+    
+        public virtual ObjectResult<MarkedNodeList> MinPath(Nullable<int> basePointNodeID, Nullable<int> addressPointNodeID, MergeOption mergeOption)
+        {
+            var basePointNodeIDParameter = basePointNodeID.HasValue ?
+                new ObjectParameter("BasePointNodeID", basePointNodeID) :
+                new ObjectParameter("BasePointNodeID", typeof(int));
+    
+            var addressPointNodeIDParameter = addressPointNodeID.HasValue ?
+                new ObjectParameter("AddressPointNodeID", addressPointNodeID) :
+                new ObjectParameter("AddressPointNodeID", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<MarkedNodeList>("MinPath", mergeOption, basePointNodeIDParameter, addressPointNodeIDParameter);
+        }
     }
 }

@@ -20,6 +20,11 @@
       <End Role="GraphStructure" EntitySet="GraphStructure" />
       <End Role="GraphNode" EntitySet="GraphNode" />
     </AssociationSet>
+    <FunctionImport Name="MinPath" EntitySet="MarkedNodeList" ReturnType="Collection(LP04Model.MarkedNodeList)">
+      <Parameter Name="BasePointNodeID" Mode="In" Type="Int32" />
+      <Parameter Name="AddressPointNodeID" Mode="In" Type="Int32" />
+    </FunctionImport>
+    <EntitySet Name="MarkedNodeList" EntityType="LP04Model.MarkedNodeList" />
   </EntityContainer>
   <EntityType Name="GraphEdge">
     <Key>
@@ -105,4 +110,14 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
+  <EntityType Name="MarkedNodeList">
+    <Key>
+      <PropertyRef Name="ID" />
+    </Key>
+    <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="NodeID" Type="Int32" />
+    <Property Name="Marked" Type="Boolean" />
+    <Property Name="DistFromStart" Type="Int32" />
+    <Property Name="PrevNode" Type="Int32" />
+  </EntityType>
 </Schema>

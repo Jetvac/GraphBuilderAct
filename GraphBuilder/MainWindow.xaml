@@ -5,13 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GraphBuilder"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded" >
+        Title="MainWindow" Height="500" Width="800" Loaded="Window_Loaded" >
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition Width="200"/>
-        </Grid.ColumnDefinitions>
-
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>
             <RowDefinition/>
@@ -21,54 +16,132 @@
             <MenuItem Header="Файл">
                 <MenuItem Header="Создать новый проект" Click="NewProject_Click"/>
                 <MenuItem Header="Открыть">
-                    <ListView x:Name="GraphProject" Background="Transparent" BorderThickness="0" SelectionChanged="GraphProject_SelectionChanged">
-                        <ListView.View>
-                            <GridView>
-                                <GridViewColumn Header="Проекты:" HeaderContainerStyle="{DynamicResource emptyHeaderLV}" DisplayMemberBinding="{Binding Name}"/>
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
+                    <DataGrid x:Name="GraphProject" Background="Transparent" BorderThickness="0" SelectionChanged="GraphProject_SelectionChanged"
+                              AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="200" CanUserReorderColumns="False" CanUserDeleteRows="False" CanUserResizeColumns="False" CanUserResizeRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Проекты:" Binding="{Binding Name}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </MenuItem>
+                <MenuItem Header="Выгрузить в Word" Click="Word_Click"/>
             </MenuItem>
         </Menu>
-        
-        <!-- Logical element that using for drawing node and edge -->
-        <Border Grid.Row="1" x:Name="GraphicRender" Background="White" MouseLeftButtonDown="Grid_MouseLeftButtonDown">
-            <Grid>
-                <!-- First render layer -->
-                <Canvas x:Name="EdgeRender">
-                </Canvas>
-                <!-- Weight render layer -->
-                <Canvas x:Name="WeightRender">
-                </Canvas>
-                <!-- Second render layer -->
-                <Canvas x:Name="NodeRender">
-                </Canvas>
-            </Grid>
-        </Border>
 
-        <Border Grid.Row="1" Grid.Column="1" Background="AliceBlue" BorderThickness="2 0 0 0" BorderBrush="LightBlue">
-            <Grid>
-                <StackPanel x:Name="UserActiveController" VerticalAlignment="Top">
+        <TabControl Grid.Row="1">
+            <TabItem Header="Рабочее пространство">
+                <TabItem.Content>
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="55"/>
                             <ColumnDefinition/>
+                            <ColumnDefinition Width="200"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock x:Name="SelectGraph" Margin="5">Проект:</TextBlock>
-                        <TextBox Grid.Column="1" x:Name="GraphName" Margin="5" TextChanged="GraphName_TextChanged"/>
-                    </Grid>
-                    <Button x:Name="AddNodeSwitch" Margin="5" Click="AddNodeSwitch_Click" ToolTip="Создаёт вершину и помещает её на поле">Добавить вершину</Button>
-                    <Button x:Name="DeleteNodeSwitch" Margin="5" Click="DeleteNodeSwitch_Click" ToolTip="Удаляет вершину и связанные с ней рёбра">Удалить вершину</Button>
-                    <Button x:Name="AddEdgeSwitch" Margin="5" Click="AddEdgeSwitch_Click" ToolTip="Создаёт маршрут между домами">Соединить вершины</Button>
-                    <Button x:Name="DefaultModeSwitch" Margin="5" Click="DefaultModeSwitch_Click" ToolTip="Режим перемещения вершин">По умолчанию</Button>
-                </StackPanel>
+                        <!-- Logical element that using for drawing node and edge -->
+                        <Border Grid.Row="1" x:Name="GraphicRender" Background="White" MouseLeftButtonDown="Grid_MouseLeftButtonDown">
+                            <Grid>
+                                <!-- First render layer -->
+                                <Canvas x:Name="EdgeRender">
+                                </Canvas>
+                                <!-- Weight render layer -->
+                                <Canvas x:Name="WeightRender">
+                                </Canvas>
+                                <!-- Second render layer -->
+                                <Canvas x:Name="NodeRender">
+                                </Canvas>
+                            </Grid>
+                        </Border>
 
-                <StackPanel Orientation="Vertical" VerticalAlignment="Bottom">
-                    <Button x:Name="DeleteProject" Margin="5" Click="DeleteProject_Click" Background="IndianRed">Удалить проект</Button>
-                </StackPanel>
-            </Grid>
-        </Border>
+                        <Border Grid.Row="1" Grid.Column="1" Background="AliceBlue" BorderThickness="2 0 0 0" BorderBrush="LightBlue">
+                            <Grid>
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="55"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock x:Name="SelectGraph" Margin="5">Проект:</TextBlock>
+                                        <TextBox Grid.Column="1" x:Name="GraphName" Margin="5" TextChanged="GraphName_TextChanged"/>
+                                    </Grid>
+                                    <GroupBox Header="Управление пространством">
+                                        <StackPanel x:Name="UserActiveController" VerticalAlignment="Top">
+                                            <Button x:Name="AddNodeSwitch" Margin="5" Click="AddNodeSwitch_Click" ToolTip="Создаёт участок и помещает его на поле">Добавить участок</Button>
+                                            <Button x:Name="DeleteNodeSwitch" Margin="5" Click="DeleteNodeSwitch_Click" ToolTip="Удаляет участок и связанные с ним газопроводы">Удалить участок</Button>
+                                            <Button x:Name="AddEdgeSwitch" Margin="5" Click="AddEdgeSwitch_Click" ToolTip="Размещает газопровод между участками">Соединить участки</Button>
+                                            <Button x:Name="DefaultModeSwitch" Margin="5" Click="DefaultModeSwitch_Click" ToolTip="Режим перемещения участков по рабочему пространству">По умолчанию</Button>
+                                        </StackPanel>
+                                    </GroupBox>
+                                    <GroupBox Header="Поиск пути">
+                                        <StackPanel>
+                                            <Grid ToolTip="Краткое название точки, которое используется при отображение элемента. (Не более 4 символов)">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="125"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Margin="5">Длина газопровода:</TextBlock>
+                                                <TextBox Grid.Column="1" x:Name="PathLength" IsEnabled="False" ToolTip="Название точки" Margin="5" TextChanged="NodeAbbName_TextChanged"/>
+                                            </Grid>
+                                            <Button x:Name="FindMinPath" Margin="5" Click="FindMinPath_Click" ToolTip="Ищет минимальный путь между участками вдоль газопровода">Поиск минимального пути</Button>
+                                        </StackPanel>
+
+                                    </GroupBox>
+                                    <GroupBox Header="Настройка участка">
+                                        <StackPanel VerticalAlignment="Top">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="65"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Margin="5">Название:</TextBlock>
+                                                <TextBox Grid.Column="1" x:Name="NodeName" ToolTip="Название точки" Margin="5" TextChanged="NodeName_TextChanged"/>
+                                            </Grid>
+                                            <Grid ToolTip="Краткое название точки, которое используется при отображение элемента. (Не более 4 символов)">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="95"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Margin="5">Аббревиатура:</TextBlock>
+                                                <TextBox Grid.Column="1" x:Name="NodeAbbName" ToolTip="Название точки" Margin="5" TextChanged="NodeAbbName_TextChanged"/>
+                                            </Grid>
+                                            <Separator/>
+                                            <DataGrid x:Name="NodeRelatedEdgeList" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="200" CanUserReorderColumns="False" CanUserDeleteRows="False" CanUserResizeColumns="False" CanUserResizeRows="False"
+                                      ToolTip="Список газопроводов, которые входят и исходят из выбранного участка">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Точка 1" Width="*" Binding="{Binding GraphNode.Abbreviation}"/>
+                                                    <DataGridTextColumn Header="Точка 2" Width="*" Binding="{Binding GraphNode1.Abbreviation}"/>
+                                                    <DataGridTextColumn Header="Вес" Width="*" Binding="{Binding Weight}"/>
+                                                </DataGrid.Columns>
+                                                <DataGrid.ContextMenu>
+                                                    <ContextMenu>
+                                                        <MenuItem Header="Подробнее" Click="ActivateEdge_Click_1"></MenuItem>
+                                                        <MenuItem Header="Удалить" Click="RemoveEdge_Click"></MenuItem>
+                                                    </ContextMenu>
+                                                </DataGrid.ContextMenu>
+                                            </DataGrid>
+                                        </StackPanel>
+                                    </GroupBox>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Bottom">
+                                    <Button x:Name="DeleteProject" Margin="5" Click="DeleteProject_Click" Background="IndianRed">Удалить проект</Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </TabItem.Content>
+            </TabItem>
+            <TabItem Header="Матрица смежности">
+                <TabItem.Content>
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                        <Grid x:Name="Matrix">
+
+                        </Grid>
+                    </ScrollViewer>
+                </TabItem.Content>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>

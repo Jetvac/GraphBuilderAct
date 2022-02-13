@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -17,11 +18,10 @@ namespace GraphBuilder
         private Canvas _edgeLayer { get; set; }
         private Canvas _nodeLayer { get; set; }
         private Canvas _weightLayer { get; set; }
-
-        //Initialize an object that using for dedicating of mouse position
         private Point? _movePoint;
         private Graph _graphRef { get; set; }
         private Node _activatedNode { get; set; }
+        private List<Edge> _activatedPath = new List<Edge>();
 
         //Used for user control logic
         public UserInputController CurrentUserControlType { get; set; } = UserInputController.Default;
@@ -64,7 +64,7 @@ namespace GraphBuilder
         {
             //Create label object and add basic event dependencies
             created.VisualAdapter = new Label()
-            { Style = (Style)MainWindow.AppResources["Node"], Width = WIDTH, Height = HEIGHT, Content = created.Name };
+            { Style = (Style)MainWindow.AppResources["Node"], Width = WIDTH, Height = HEIGHT, Content = created.Abbreviation };
             created.VisualAdapter.MouseUp += Node_MouseUp;
             created.VisualAdapter.MouseDown += Node_MouseDown;
             created.VisualAdapter.MouseMove += Node_MouseMove;
@@ -109,7 +109,7 @@ namespace GraphBuilder
 
             return result;
         }
-        
+
 
         //Object delete methods
         /// <summary>
@@ -123,6 +123,17 @@ namespace GraphBuilder
             _nodeLayer.Children.Remove(node.VisualAdapter);
 
             return relatedEdges;
+        }
+        /// <summary>
+        /// Delete edge from references graph logic structure
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <returns></returns>
+        public void RemoveEdge(Edge edge)
+        {
+            _graphRef.RemoveEdge(edge);
+            _edgeLayer.Children.Remove(edge.VisualAdapter);
+            RemoveEdgeRelatedWeight(edge);
         }
         /// <summary>
         /// Delete edges by depended node
@@ -190,9 +201,9 @@ namespace GraphBuilder
         /// <param name="parentEdge"></param>
         private void MoveWeightAdapter(Edge parentEdge)
         {
-            Canvas.SetLeft(parentEdge.WeightAdapter.VisualAdapter, 
+            Canvas.SetLeft(parentEdge.WeightAdapter.VisualAdapter,
                 ((parentEdge.BaseNode.PosX + parentEdge.AddressNode.PosX) / 2) + (WIDTH / 2) - (parentEdge.WeightAdapter.VisualAdapter.ActualWidth / 2));
-            Canvas.SetTop(parentEdge.WeightAdapter.VisualAdapter, 
+            Canvas.SetTop(parentEdge.WeightAdapter.VisualAdapter,
                 ((parentEdge.BaseNode.PosY + parentEdge.AddressNode.PosY) / 2) + (WIDTH / 2) - (parentEdge.WeightAdapter.VisualAdapter.ActualHeight / 2));
         }
         /// <summary>
@@ -273,6 +284,11 @@ namespace GraphBuilder
 
 
         //Logic
+        public void ChangeNodeAbbreviation(Node node, string newName)
+        {
+            node.Abbreviation = newName;
+            node.VisualAdapter.Content = newName;
+        }
         public void SwitchCurrentControlMode(UserInputController type)
         {
             switch (type)
@@ -286,10 +302,16 @@ namespace GraphBuilder
                     CurrentUserControlType = UserInputController.NodeCreating;
                     break;
                 case UserInputController.EdgeCreating:
+                    TakeOffNodeActivation();
                     CurrentUserControlType = UserInputController.EdgeCreating;
                     break;
                 case UserInputController.NodeDelete:
+                    TakeOffNodeActivation();
                     CurrentUserControlType = UserInputController.NodeDelete;
+                    break;
+                case UserInputController.MinPath:
+                    TakeOffNodeActivation();
+                    CurrentUserControlType = UserInputController.MinPath;
                     break;
             }
         }
@@ -303,6 +325,15 @@ namespace GraphBuilder
             _activatedNode = node;
         }
         /// <summary>
+        /// Change edge adapter style to marked
+        /// </summary>
+        /// <param name="edge"></param>
+        public void MakeEdgeActive(Edge edge)
+        {
+            edge.VisualAdapter.Style = (Style)MainWindow.AppResources["EdgeMarked"];
+            _activatedPath.Add(edge);
+        }
+        /// <summary>
         /// Change node adapter style to normal
         /// </summary>
         private void TakeOffNodeActivation()
@@ -312,6 +343,14 @@ namespace GraphBuilder
                 _activatedNode.VisualAdapter.Style = (Style)MainWindow.AppResources["Node"];
                 _activatedNode = null;
             }
+        }
+        public void TakeOffEdgeActivation()
+        {
+            foreach (Edge edge in _activatedPath)
+            {
+                edge.VisualAdapter.Style = (Style)MainWindow.AppResources["Edge"];
+            }
+            _activatedPath.Clear();
         }
 
 
@@ -324,6 +363,8 @@ namespace GraphBuilder
         public void Node_MouseUp(object sender, MouseButtonEventArgs e)
         {
             Node selectedNode = _graphRef.FindNodeByAdapter((Label)sender);
+
+            MainWindow.SelectNode(selectedNode);
 
             _movePoint = null;
             ((Label)sender).ReleaseMouseCapture();
@@ -349,6 +390,8 @@ namespace GraphBuilder
                         {
                             MessageBox.Show("Предлагаемое ребро существует", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
+
+                        MainWindow.UpdateMatrix();
                         TakeOffNodeActivation();
                     }
                     break;
@@ -358,6 +401,38 @@ namespace GraphBuilder
                     
                     List<Edge> trashEdges = RemoveNode(selectedNode);
                     RemoveNodeRelatedEdges(trashEdges);
+                    MainWindow.UpdateMatrix();
+                    break;
+                case UserInputController.MinPath:
+                    TakeOffEdgeActivation();
+                    if (_activatedNode == null)
+                    {
+                        MakeNodeActive(selectedNode);
+                    }
+                    else
+                    {
+                        List<MarkedNodeList> nodes = new LP04Entities().MinPath(_activatedNode.ID, selectedNode.ID).ToList();
+
+                        // Save end-point edge (back direction)
+                        int currentNodeID = selectedNode.ID;
+
+                        MainWindow.pathLength.Text = Convert.ToString(nodes.FirstOrDefault(c => c.NodeID == currentNodeID).DistFromStart);
+
+                        while (true)
+                        {
+                            int? nextNodeID = nodes.FirstOrDefault(c => c.NodeID == currentNodeID).PrevNode;
+                            if (nextNodeID == null) { MessageBox.Show("Путь не найден!", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information); break; }
+                            if (nextNodeID == -1) { break; } // Конечная
+
+                            Node first = _graphRef.FindNodeByID(Convert.ToInt32(nextNodeID));
+                            Node second = _graphRef.FindNodeByID(currentNodeID);
+
+                            MakeEdgeActive(_graphRef.SearchEdgeNonStraightedByNodes(first, second));
+                            currentNodeID = Convert.ToInt32(nextNodeID);
+                        }
+
+                        TakeOffNodeActivation();
+                    }
                     break;
             }
         }
@@ -371,10 +446,10 @@ namespace GraphBuilder
             switch (CurrentUserControlType)
             {
                 case UserInputController.Default:
-                    MoveNodeStructure(selectedNode, p.X, p.Y);
+                    MoveNodeStructure(selectedNode, p.X, p.Y - 40);
 
                     // There is used static variable from main class
-                    MainWindow.dbController.MoveNode(selectedNode, p.X, p.Y);
+                    MainWindow.dbController.MoveNode(selectedNode, p.X, p.Y - 40);
                     break;
             }
         }
@@ -385,6 +460,9 @@ namespace GraphBuilder
         {
             TextBox current = (TextBox)sender;
             if (current.Text.Length == 0) { current.Text = "0"; }
+            if (current.Text.Length > 4) { 
+                MessageBox.Show("Максимальная длина пути не должна превышать 4-х значного числа.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error); 
+                current.Text = "0"; }
 
             int weight = 0;
 
