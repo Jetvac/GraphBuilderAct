@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GraphBuilder"
         mc:Ignorable="d"
-        Title="MainWindow" Height="500" Width="800" Loaded="Window_Loaded" >
+        Title="Gas" Height="500" Width="800" Loaded="Window_Loaded" Icon="/icon.png" >
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>
@@ -25,9 +25,32 @@
                 </MenuItem>
                 <MenuItem Header="Выгрузить в Word" Click="Word_Click"/>
             </MenuItem>
+            <MenuItem Header="Справка"/>
+            <MenuItem Header="Выход" Click="CloseProgramm_Click"/>
         </Menu>
 
         <TabControl Grid.Row="1">
+            <TabItem Header="Главная">
+                <TabItem.Content>
+                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <StackPanel>
+                            <Image Width="150" Height="150" Source="/icon.png"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Label FontWeight="Bold">Название программы:</Label>
+                                <Label>Gas Import</Label>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label FontWeight="Bold">Версия:</Label>
+                                <Label>1.0</Label>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label FontWeight="Bold">Разработчик:</Label>
+                                <Label>Эдуард Румынин, группа 1282</Label>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </TabItem.Content>
+            </TabItem>
             <TabItem Header="Рабочее пространство">
                 <TabItem.Content>
                     <Grid>
@@ -73,7 +96,7 @@
                                     </GroupBox>
                                     <GroupBox Header="Поиск пути">
                                         <StackPanel>
-                                            <Grid ToolTip="Краткое название точки, которое используется при отображение элемента. (Не более 4 символов)">
+                                            <Grid ToolTip="Оптимальный путь">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="125"/>
                                                     <ColumnDefinition/>

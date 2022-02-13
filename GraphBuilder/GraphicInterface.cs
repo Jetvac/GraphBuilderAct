@@ -21,7 +21,7 @@ namespace GraphBuilder
         private Point? _movePoint;
         private Graph _graphRef { get; set; }
         private Node _activatedNode { get; set; }
-        private List<Edge> _activatedPath = new List<Edge>();
+        public List<Edge> _activatedPath = new List<Edge>();
 
         //Used for user control logic
         public UserInputController CurrentUserControlType { get; set; } = UserInputController.Default;
@@ -431,6 +431,7 @@ namespace GraphBuilder
                             currentNodeID = Convert.ToInt32(nextNodeID);
                         }
 
+                        MainWindow.UpdateMatrix();
                         TakeOffNodeActivation();
                     }
                     break;

@@ -323,5 +323,10 @@ namespace GraphBuilder
         {
             GetImage().Save(@"./logo.png");
         }
+
+        private void CloseProgramm_Click(object sender, RoutedEventArgs e)
+        {
+            App.Current.Shutdown();
+        }
     }
 }

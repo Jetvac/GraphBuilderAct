@@ -95,10 +95,10 @@ namespace GraphBuilder
 
             return item;
         }
-        public CellItem InitNewCellItem(GraphEdge edge, int posX, int posY)
+        public CellItem InitNewCellItem(GraphEdge edge, int posX, int posY, string style)
         {
             TextBox textBoxColumn = new TextBox()
-            { IsEnabled = false, Text = Convert.ToString(edge.Weight), Style = (Style)MainWindow.AppResources["GridItem"], Width = ITEM_SIZE, Height = ITEM_SIZE };
+            { IsEnabled = false, Text = Convert.ToString(edge.Weight), Style = (Style)MainWindow.AppResources[style], Width = ITEM_SIZE, Height = ITEM_SIZE };
 
             Matrix.Children.Add(textBoxColumn);
             CellItem item = new CellItem(edge, textBoxColumn, posX, posY);
@@ -154,9 +154,16 @@ namespace GraphBuilder
                 int FirstPos = GetPosByHeader(itemData.GraphNode);
                 int LastPos = GetPosByHeader(itemData.GraphNode1);
 
+                string style = "GridItem";
 
-                CellItem itemCell = InitNewCellItem(itemData, FirstPos, LastPos);
-                CellItem itemCellMirrored = InitNewCellItem(itemData, LastPos, FirstPos);
+                if (MainWindow.GraphicController != null)
+                    if (MainWindow.GraphicController._activatedPath.FirstOrDefault(c => c.ID == itemData.EdgeID) != null)
+                    {
+                        style = "ActivatedGridItem";
+                    }
+
+                CellItem itemCell = InitNewCellItem(itemData, FirstPos, LastPos, style);
+                CellItem itemCellMirrored = InitNewCellItem(itemData, LastPos, FirstPos, style);
 
                 CellItems.Add(itemCell);
                 CellItems.Add(itemCellMirrored);
