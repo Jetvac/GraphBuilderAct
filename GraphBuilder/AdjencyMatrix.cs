@@ -193,35 +193,43 @@ namespace GraphBuilder
         }
 
         // Work methods
-        public List<string[]> GetOutputMatrix()
+        public List<string[,]> GetOutputMatrix()
         {
-            List<string[]> output = new List<string[]>();
+            List<string[,]> output = new List<string[,]>();
 
             for (int i = 0; i < HeaderItemsRows.Count(); i++)
             {
-                output.Add(new string[HeaderItemsRows.Count()]);
+                output.Add(new string[HeaderItemsRows.Count(), 2]);
 
                 for (int j = 0; j < HeaderItemsColumns.Count(); j++)
                 {
                     if (i == 0 && j != 0) // Загаловочная ячейка (Слева)
                     {
-                        output[i][j] = HeaderItemsRows[j].data.Abbreviation;
+                        output[i][j,0] = HeaderItemsRows[j].data.Abbreviation;
                     }
                     else if (j == 0 && i != 0) // Загаловочная ячейка (Сверху)
                     {
-                        output[i][j] = HeaderItemsColumns[i].data.Abbreviation;
+                        output[i][j,0] = HeaderItemsColumns[i].data.Abbreviation;
                     }
                     else if (i == 0 && j != 0)
                     {
-                        output[i][j] = "";
+                        output[i][j,0] = "";
                     }
                     else if (i != 0 && j != 0)
                     {
                         CellItem item = CellItems.FirstOrDefault(c => c.PosX == j && c.PosY == i);
                         if (item != null)
-                            output[i][j] = Convert.ToString(item.data.Weight);
+                            if (MainWindow.GraphicController != null)
+                                if (MainWindow.GraphicController._activatedPath.FirstOrDefault(c => c.ID == item.data.EdgeID) != null)
+                                {
+                                    output[i][j, 0] = Convert.ToString(item.data.Weight);
+                                    output[i][j, 1] = "#90EE90";
+                                } else
+                                {
+                                    output[i][j, 0] = Convert.ToString(item.data.Weight);
+                                }
                         else
-                            output[i][j] = "";
+                            output[i][j,0] = "";
                     }
                 }
             }

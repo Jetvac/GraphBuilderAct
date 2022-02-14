@@ -12,7 +12,7 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <Menu Grid.ColumnSpan="2">
+        <Menu Grid.ColumnSpan="2" Width="Auto">
             <MenuItem Header="Файл">
                 <MenuItem Header="Создать новый проект" Click="NewProject_Click"/>
                 <MenuItem Header="Открыть">

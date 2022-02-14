@@ -353,7 +353,7 @@ namespace GraphBuilder
             if (project == null) { return; }
 
             string path = "Example 1.docx";
-            List<string[]> table = matrixVisual.GetOutputMatrix();
+            List<string[,]> table = matrixVisual.GetOutputMatrix();
 
 
             // Создание нового отчёта

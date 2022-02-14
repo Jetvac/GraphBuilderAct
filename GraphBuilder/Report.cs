@@ -9,6 +9,7 @@ using System.Windows.Media.Imaging;
 using DW = DocumentFormat.OpenXml.Drawing.Wordprocessing;
 using A = DocumentFormat.OpenXml.Drawing;
 using PIC = DocumentFormat.OpenXml.Drawing.Pictures;
+using System;
 
 namespace GraphBuilder
 {
@@ -19,6 +20,20 @@ namespace GraphBuilder
         /// </summary>
         private Body body;
 
+
+        public class image
+        {
+            public string fileName;
+            public double width;
+            public double height;
+            public image (string _fileName, double _width, double _height)
+            {
+                this.fileName = _fileName;
+                this.width = _width;
+                this.height = _height;
+            }
+        }
+        public List<image> images = new List<image>();
         public Report()
         {
             // Инициализация тела документа
@@ -42,7 +57,7 @@ namespace GraphBuilder
         /// Добавить таблицу в документ
         /// </summary>
         /// <param name="content">Таблица, добавляемая в документ</param>
-        public void AddTable(List<string[]> content)
+        public void AddTable(List<string[,]> content)
         {
             // Количество строк таблицы
             int rowsCount = content.Count;
@@ -58,11 +73,23 @@ namespace GraphBuilder
             {
                 TableRow row = new TableRow();
 
-                for (int j = 0; j < columnsCount; j++)
+                for (int j = 0; j < columnsCount / 2; j++)
                 {
                     TableCell cell = new TableCell();
+
+
+                    TableCellProperties tcp = new TableCellProperties(
+                        new TableCellWidth { Width = Convert.ToString(AdjencyMatrix.ITEM_SIZE), Type = TableWidthUnitValues.Pct }
+                    );
+
+                    if (content[i][j, 1] != null)
+                        tcp.Append(new Shading() { Color = "auto", Fill = "98EA98", Val = ShadingPatternValues.Clear });
+                    else if (i == 0 || j == 0)
+                        tcp.Append(new Shading() { Color = "auto", Fill = "FFE599", Val = ShadingPatternValues.Clear });
+
+                    cell.Append(tcp);
                     // Значение в ячейке
-                    Paragraph value = this.GetParagraph(content[i][j]);
+                    Paragraph value = this.GetParagraph(content[i][j,0]);
 
                     // Добавление значения в ячейку
                     cell.Append(value);
@@ -79,9 +106,10 @@ namespace GraphBuilder
 
         public void AddImageToBody(string imageFileName, double width, double height)
         {
-            this.body.AppendChild(new Paragraph(new Run(GetImageElement(imageFileName, "img", width, height))));
+            images.Add(new image(imageFileName, width, height)); 
         }
         private static Drawing GetImageElement(
+            string imagePartId,
             string fileName,
             string pictureName,
             double width,
@@ -91,8 +119,8 @@ namespace GraphBuilder
             double pixelsPerInch = 96;
 
             //calculate size in emu
-            double emuWidth = width * englishMetricUnitsPerInch / pixelsPerInch;
-            double emuHeight = height * englishMetricUnitsPerInch / pixelsPerInch;
+            double emuWidth = (width * englishMetricUnitsPerInch / pixelsPerInch) * .6;
+            double emuHeight = (height * englishMetricUnitsPerInch / pixelsPerInch) * .6;
 
             var element = new Drawing(
                 new DW.Inline(
@@ -112,6 +140,7 @@ namespace GraphBuilder
                                         new A.BlipExtensionList(
                                             new A.BlipExtension { Uri = "{28A0092B-C50C-407E-A947-70E740481C1C}" }))
                                     {
+                                        Embed = imagePartId,
                                         CompressionState = A.BlipCompressionValues.Print
                                     },
                                             new A.Stretch(new A.FillRectangle())),
@@ -220,6 +249,21 @@ namespace GraphBuilder
             using (WordprocessingDocument wordDocument = WordprocessingDocument.Create(path, WordprocessingDocumentType.Document, true))
             {
                 MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
+
+                foreach (image item in images)
+                {
+                    ImagePart imagePart = wordDocument.MainDocumentPart.AddImagePart(ImagePartType.Png);
+
+                    using (FileStream stream = new FileStream(item.fileName, FileMode.Open))
+                    {
+                        imagePart.FeedData(stream);
+                    }
+
+                    this.body.AppendChild(new Paragraph(new Run(GetImageElement(
+                         wordDocument.MainDocumentPart.GetIdOfPart(imagePart),
+                         item.fileName, item.fileName, item.width, item.height))));
+                }
+
                 mainPart.Document = new Document();
                 mainPart.Document.Body = this.body;
                 mainPart.Document.Save();

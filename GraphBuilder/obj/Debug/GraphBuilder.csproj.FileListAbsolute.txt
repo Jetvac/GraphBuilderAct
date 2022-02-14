@@ -83,3 +83,13 @@ C:\Users\edrum\source\repos\Jetvac\GraphBuilderAct\GraphBuilder\obj\Debug\GraphB
 C:\Users\edrum\source\repos\Jetvac\GraphBuilderAct\GraphBuilder\bin\Debug\DocumentFormat.OpenXml.dll
 C:\Users\edrum\source\repos\Jetvac\GraphBuilderAct\GraphBuilder\bin\Debug\DocumentFormat.OpenXml.xml
 C:\Users\edrum\source\repos\Jetvac\GraphBuilderAct\GraphBuilder\bin\Debug\ru\EntityFramework.SqlServer.resources.dll
+C:\Users\edrum\Documents\GitHub\GraphBuilder\GraphBuilder\bin\Debug\DocumentFormat.OpenXml.dll
+C:\Users\edrum\Documents\GitHub\GraphBuilder\GraphBuilder\bin\Debug\EntityFramework.dll
+C:\Users\edrum\Documents\GitHub\GraphBuilder\GraphBuilder\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\edrum\Documents\GitHub\GraphBuilder\GraphBuilder\bin\Debug\DocumentFormat.OpenXml.xml
+C:\Users\edrum\Documents\GitHub\GraphBuilder\GraphBuilder\bin\Debug\EntityFramework.xml
+C:\Users\edrum\Documents\GitHub\GraphBuilder\GraphBuilder\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\edrum\Documents\GitHub\GraphBuilder\GraphBuilder\bin\Debug\ru\EntityFramework.resources.dll
+C:\Users\edrum\Documents\GitHub\GraphBuilder\GraphBuilder\bin\Debug\ru\EntityFramework.SqlServer.resources.dll
+C:\Users\edrum\Documents\GitHub\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder_Content.g.cs
+C:\Users\edrum\Documents\GitHub\GraphBuilder\GraphBuilder\obj\Debug\GraphBuilder.csproj.CopyComplete
