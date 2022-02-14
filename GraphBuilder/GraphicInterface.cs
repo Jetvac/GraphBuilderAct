@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Shapes;
 using static GraphBuilder.Graph;
@@ -21,8 +22,8 @@ namespace GraphBuilder
         private Point? _movePoint;
         private Graph _graphRef { get; set; }
         private Node _activatedNode { get; set; }
-        public List<Edge> _activatedPath = new List<Edge>();
-
+        public List<Edge> ActivatedPath = new List<Edge>();
+        public List<Node> MinPath = new List<Node>();
         //Used for user control logic
         public UserInputController CurrentUserControlType { get; set; } = UserInputController.Default;
         public GraphicInterface(Canvas edgeLayer, Canvas nodeLayer, Canvas weightLayer, ref Graph graph)
@@ -39,9 +40,9 @@ namespace GraphBuilder
 
 
 
-        //Object initialize methods
+        #region Методы инициализации объектов
         /// <summary>
-        /// Place graph objects on canvas
+        /// Инициализируте переданный граф
         /// </summary>
         /// <param name="graph"></param>
         public void InitializeGraphStructure(Graph graph)
@@ -57,9 +58,10 @@ namespace GraphBuilder
             }
         }
         /// <summary>
-        /// Initialize node, set basic dependencies and place it on canvas
+        /// Инициализирует узел, задаёт ему базовые зависимости и размещает на canvas
         /// </summary>
-        /// <returns>Created node</returns>
+        /// <param name="created">Логическая структура узла</param>
+        /// <returns>Созданный узел</returns>
         public Node InitializeNodeGraphic(Node created)
         {
             //Create label object and add basic event dependencies
@@ -75,12 +77,10 @@ namespace GraphBuilder
             return created;
         }
         /// <summary>
-        /// Initialize edge, set basic dependencies and place it on canvas
+        /// Инициализирует ребро, задаёт ему базовые зависимости и размещает на canvas
         /// </summary>
-        /// <param name="edgeGraphicLayer"></param>
-        /// <param name="baseNode"></param>
-        /// <param name="addressNode"></param>
-        /// <returns></returns>
+        /// <param name="created">Логическая структура ребра</param>
+        /// <returns>Созданное ребро</returns>
         public Edge InitializeEdgeGraphic(Edge created)
         {
             Weight weightAdapter = CreateWeightAdapter(created.Weight);
@@ -96,7 +96,7 @@ namespace GraphBuilder
             return created;
         }
         /// <summary>
-        /// Intitialize and add weight to edge, set basic dependencies and place it on canvas
+        /// Инициализирует объект weight, задаёт ему позицию между зависимыми узлами и размещает на canvas
         /// </summary>
         /// <param name="weight"></param>
         /// <returns></returns>
@@ -109,14 +109,14 @@ namespace GraphBuilder
 
             return result;
         }
+        #endregion
 
-
-        //Object delete methods
+        #region Методы удаления объектов
         /// <summary>
-        /// Delete node from references graph logic structure
+        /// Удаляет узел из логической структуры графа
         /// </summary>
         /// <param name="node"></param>
-        /// <returns>Related edges with removed node</returns>
+        /// <returns>Связанные с узлом рёбра</returns>
         public List<Edge> RemoveNode(Node node)
         {
             List<Edge> relatedEdges = _graphRef.RemoveNode(node);
@@ -125,7 +125,7 @@ namespace GraphBuilder
             return relatedEdges;
         }
         /// <summary>
-        /// Delete edge from references graph logic structure
+        /// Удаляет ребро из логической структуры графа
         /// </summary>
         /// <param name="edge"></param>
         /// <returns></returns>
@@ -136,7 +136,7 @@ namespace GraphBuilder
             RemoveEdgeRelatedWeight(edge);
         }
         /// <summary>
-        /// Delete edges by depended node
+        /// Удаляет ребра из логической структуры графа
         /// </summary>
         /// <param name="edges"></param>
         public void RemoveNodeRelatedEdges(List<Edge> edges)
@@ -148,7 +148,7 @@ namespace GraphBuilder
             }
         }
         /// <summary>
-        /// Delete weight by depended weight
+        /// Удаляет объект weight из логической структуры графа
         /// </summary>
         /// <param name="parent"></param>
         public void RemoveEdgeRelatedWeight(Edge parent)
@@ -156,7 +156,7 @@ namespace GraphBuilder
             _weightLayer.Children.Remove(parent.WeightAdapter.VisualAdapter);
         }
         /// <summary>
-        /// Delete all children in canvas
+        /// Удаляет все объекты, размещённые на canvas
         /// </summary>
         public void ClearCanvas()
         {
@@ -164,10 +164,11 @@ namespace GraphBuilder
             _nodeLayer.Children.Clear();
             _weightLayer.Children.Clear();
         }
+        #endregion
 
-        //Object positioning methods
+        #region Методы позиционирования объектов
         /// <summary>
-        /// Change node position on canvas
+        /// Изменяет позицию узла на canvas
         /// </summary>
         /// <param name="node"></param>
         /// <param name="newPosX"></param>
@@ -196,7 +197,7 @@ namespace GraphBuilder
             }
         }
         /// <summary>
-        /// Calculate new weight position by dependencies
+        /// Рассчитывает новую позицию weight по зависимостям
         /// </summary>
         /// <param name="parentEdge"></param>
         private void MoveWeightAdapter(Edge parentEdge)
@@ -207,7 +208,7 @@ namespace GraphBuilder
                 ((parentEdge.BaseNode.PosY + parentEdge.AddressNode.PosY) / 2) + (WIDTH / 2) - (parentEdge.WeightAdapter.VisualAdapter.ActualHeight / 2));
         }
         /// <summary>
-        /// Change position of first point of edge on canvas
+        /// Изменяет позицию первой точки ребра на canvas
         /// </summary>
         /// <param name="edge"></param>
         /// <param name="newPosX"></param>
@@ -218,7 +219,7 @@ namespace GraphBuilder
             edge.VisualAdapter.Y1 = newPosY + HEIGHT / 2;
         }
         /// <summary>
-        /// Change position of second point of edge on canvas
+        /// Изменяет позицию второй точки ребра на canvas
         /// </summary>
         /// <param name="edge"></param>
         /// <param name="newPosX"></param>
@@ -228,16 +229,13 @@ namespace GraphBuilder
             edge.VisualAdapter.X2 = newPosX + WIDTH / 2;
             edge.VisualAdapter.Y2 = newPosY + HEIGHT / 2;
         }
+        #endregion
 
-
-        //Object place methods (On canvas)
+        #region Методы размещения объектов на canvas
         /// <summary>
-        /// Place node on canvas by given position
+        /// Размещает узел на canvas по указаной в объекте позиции
         /// </summary>
-        /// <param name="canvas"></param>
         /// <param name="node"></param>
-        /// <param name="pointX"></param>
-        /// <param name="pointY"></param>
         /// <returns></returns>
         private bool PlaceNode(Node node)
         {
@@ -251,7 +249,7 @@ namespace GraphBuilder
             return true;
         }
         /// <summary>
-        /// Place edge on canvas
+        /// Размещает ребро на canvas по указаной в объекте позиции
         /// </summary>
         /// <param name="edge"></param>
         /// <param name="baseNode"></param>
@@ -269,7 +267,7 @@ namespace GraphBuilder
             return true;
         }
         /// <summary>
-        /// Place weight on canvas at center of two nodes (Base and parent)
+        /// Размещает вес на canvas между двумя узлами
         /// </summary>
         /// <param name="weight"></param>
         /// <param name="parentEdge"></param>
@@ -281,14 +279,18 @@ namespace GraphBuilder
 
             return true;
         }
+        #endregion
 
-
-        //Logic
+        #region Логика
         public void ChangeNodeAbbreviation(Node node, string newName)
         {
             node.Abbreviation = newName;
             node.VisualAdapter.Content = newName;
         }
+        /// <summary>
+        /// Изменяет текущий режим контроля пространством
+        /// </summary>
+        /// <param name="type"></param>
         public void SwitchCurrentControlMode(UserInputController type)
         {
             switch (type)
@@ -316,7 +318,7 @@ namespace GraphBuilder
             }
         }
         /// <summary>
-        /// Change node adapter style to active
+        /// Изменяет стиль узла на активный
         /// </summary>
         /// <param name="node"></param>
         private void MakeNodeActive(Node node)
@@ -325,16 +327,16 @@ namespace GraphBuilder
             _activatedNode = node;
         }
         /// <summary>
-        /// Change edge adapter style to marked
+        /// Изменяет стиль ребра на активный
         /// </summary>
         /// <param name="edge"></param>
         public void MakeEdgeActive(Edge edge)
         {
             edge.VisualAdapter.Style = (Style)MainWindow.AppResources["EdgeMarked"];
-            _activatedPath.Add(edge);
+            ActivatedPath.Add(edge);
         }
         /// <summary>
-        /// Change node adapter style to normal
+        /// Изменяет стиль узла на нормальный
         /// </summary>
         private void TakeOffNodeActivation()
         {
@@ -344,17 +346,62 @@ namespace GraphBuilder
                 _activatedNode = null;
             }
         }
+        /// <summary>
+        /// Изменяет стиль ребра на нормальный
+        /// </summary>
         public void TakeOffEdgeActivation()
         {
-            foreach (Edge edge in _activatedPath)
+            foreach (Edge edge in ActivatedPath)
             {
                 edge.VisualAdapter.Style = (Style)MainWindow.AppResources["Edge"];
             }
-            _activatedPath.Clear();
+            ActivatedPath.Clear();
         }
+        /// <summary>
+        /// Получает минимальный путь между узлами с помощью алгоритма Дейкстры
+        /// </summary>
+        /// <param name="firstPointNode">Узел начала</param>
+        /// <param name="secondPointNode">Узел конца</param>
+        /// <returns></returns>
+        public List<Edge> GetMinPath(Node firstPointNode, Node secondPointNode)
+        {
+            List<Edge> path = new List<Edge>();
+            List<MarkedNodeList> nodes = new LP04Entities().MinPath(firstPointNode.ID, secondPointNode.ID).ToList();
+            MinPath = new List<Node>();
+
+            // Save end-point edge (back direction)
+            int currentNodeID = secondPointNode.ID;
+
+            MainWindow.pathLength.Text = Convert.ToString(nodes.FirstOrDefault(c => c.NodeID == currentNodeID).DistFromStart);
+
+            while (true)
+            {
+                int? nextNodeID = nodes.FirstOrDefault(c => c.NodeID == currentNodeID).PrevNode;
+                if (nextNodeID == null) { return null; }
+                if (nextNodeID == -1) { break; } // Конечная
+
+                Node first = _graphRef.FindNodeByID(Convert.ToInt32(nextNodeID));
+                Node second = _graphRef.FindNodeByID(currentNodeID);
+                MinPath.Add(second);
+
+                path.Add(_graphRef.SearchEdgeNonStraightedByNodes(first, second));
+
+                currentNodeID = Convert.ToInt32(nextNodeID);
+            }
 
 
-        //Drag and drop triggers
+            MinPath.Add(firstPointNode);
+            MinPath.Reverse();
+            return path;
+        }
+        #endregion
+
+        #region Drag and drop triggers
+        /// <summary>
+        /// Инициализирует объект для отслеживания позиции мыши
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void Node_MouseDown(object sender, MouseButtonEventArgs e)
         {
             _movePoint = e.GetPosition((Label)sender);
@@ -411,24 +458,15 @@ namespace GraphBuilder
                     }
                     else
                     {
-                        List<MarkedNodeList> nodes = new LP04Entities().MinPath(_activatedNode.ID, selectedNode.ID).ToList();
-
-                        // Save end-point edge (back direction)
-                        int currentNodeID = selectedNode.ID;
-
-                        MainWindow.pathLength.Text = Convert.ToString(nodes.FirstOrDefault(c => c.NodeID == currentNodeID).DistFromStart);
-
-                        while (true)
+                        List<Edge> path = GetMinPath(_activatedNode, selectedNode);
+                        if (path == null)
                         {
-                            int? nextNodeID = nodes.FirstOrDefault(c => c.NodeID == currentNodeID).PrevNode;
-                            if (nextNodeID == null) { MessageBox.Show("Путь не найден!", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information); break; }
-                            if (nextNodeID == -1) { break; } // Конечная
+                            MessageBox.Show("Путь не найден!", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
 
-                            Node first = _graphRef.FindNodeByID(Convert.ToInt32(nextNodeID));
-                            Node second = _graphRef.FindNodeByID(currentNodeID);
-
-                            MakeEdgeActive(_graphRef.SearchEdgeNonStraightedByNodes(first, second));
-                            currentNodeID = Convert.ToInt32(nextNodeID);
+                        foreach (Edge edge in path)
+                        {
+                            MakeEdgeActive(edge);
                         }
 
                         MainWindow.UpdateMatrix();
@@ -437,6 +475,11 @@ namespace GraphBuilder
                     break;
             }
         }
+        /// <summary>
+        /// Перемещает узел в случае если выставлен нужный режим
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void Node_MouseMove(object sender, MouseEventArgs e)
         {
             if (_movePoint == null) return;
@@ -454,9 +497,14 @@ namespace GraphBuilder
                     break;
             }
         }
+        #endregion
 
-
-        //Another triggers
+        #region Другие триггеры
+        /// <summary>
+        /// Изменяет значение расстояние в базе и на форме
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void WeightTxtBx_TextChanged(object sender, TextChangedEventArgs e)
         {
             TextBox current = (TextBox)sender;
@@ -482,9 +530,15 @@ namespace GraphBuilder
 
             MoveWeightAdapter(edge);
         }
+        /// <summary>
+        /// Триггер на запрет ввода любых символов, кроме цифер
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void WeightTxtBx_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = "0123456789".IndexOf(e.Text) < 0;
         }
+        #endregion
     }
 }

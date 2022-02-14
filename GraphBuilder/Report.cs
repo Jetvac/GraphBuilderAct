@@ -79,11 +79,11 @@ namespace GraphBuilder
 
 
                     TableCellProperties tcp = new TableCellProperties(
-                        new TableCellWidth { Width = Convert.ToString(AdjencyMatrix.ITEM_SIZE), Type = TableWidthUnitValues.Pct }
+                        new TableCellWidth { Width = Convert.ToString(AdjencyMatrix.ITEM_SIZE), Type = TableWidthUnitValues.Nil }
                     );
 
                     if (content[i][j, 1] != null)
-                        tcp.Append(new Shading() { Color = "auto", Fill = "98EA98", Val = ShadingPatternValues.Clear });
+                        tcp.Append(new Shading() { Color = "auto", Fill = content[i][j, 1], Val = ShadingPatternValues.Clear });
                     else if (i == 0 || j == 0)
                         tcp.Append(new Shading() { Color = "auto", Fill = "FFE599", Val = ShadingPatternValues.Clear });
 
@@ -103,17 +103,26 @@ namespace GraphBuilder
 
             this.body.Append(table);
         }
-
+        /// <summary>
+        /// Добавить картинку в документ
+        /// </summary>
+        /// <param name="imageFileName">Название файла с которого берётся изображение</param>
+        /// <param name="width">Ширина изображения</param>
+        /// <param name="height">Высота изображения</param>
         public void AddImageToBody(string imageFileName, double width, double height)
         {
             images.Add(new image(imageFileName, width, height)); 
         }
-        private static Drawing GetImageElement(
-            string imagePartId,
-            string fileName,
-            string pictureName,
-            double width,
-            double height)
+        /// <summary>
+        /// Создаёт элемент изображения
+        /// </summary>
+        /// <param name="imagePartId">Позиция изображения в документе</param>
+        /// <param name="fileName">Название файла с которого берётся изображение</param>
+        /// <param name="pictureName">Персональное название изображения в документе</param>
+        /// <param name="width">Ширина изображения</param>
+        /// <param name="height">Высота изображения</param>
+        /// <returns></returns>
+        private static Drawing GetImageElement(string imagePartId, string fileName, string pictureName, double width, double height)
         {
             double englishMetricUnitsPerInch = 914400;
             double pixelsPerInch = 96;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace GraphBuilder
 {
@@ -85,7 +86,7 @@ namespace GraphBuilder
         public GraphStructure GraphData { get; set; }
 
 
-        // Init methods
+        #region Методы инициализации матрицы
         /// <summary>
         /// Метод инициализации загаловочных ячеек матрицы
         /// </summary>
@@ -97,6 +98,8 @@ namespace GraphBuilder
         {
             TextBox textBoxColumn = new TextBox()
             { IsEnabled = false, Text = node.Abbreviation, Style = (Style)MainWindow.AppResources["GridHeader"], Width = ITEM_SIZE, Height = ITEM_SIZE };
+
+            textBoxColumn.SetBinding(TextBlock.TextProperty, new Binding() { Source = node.Abbreviation, Path = new PropertyPath("Value"), Mode = BindingMode.TwoWay });
 
             Matrix.Children.Add(textBoxColumn);
             HeaderItem item = new HeaderItem(node, textBoxColumn, posX, posY);
@@ -113,11 +116,13 @@ namespace GraphBuilder
         /// <returns></returns>
         public CellItem InitNewCellItem(GraphEdge edge, int posX, int posY, string style)
         {
-            TextBox textBoxColumn = new TextBox()
+            TextBox textBox = new TextBox()
             { IsEnabled = false, Text = Convert.ToString(edge.Weight), Style = (Style)MainWindow.AppResources[style], Width = ITEM_SIZE, Height = ITEM_SIZE };
 
-            Matrix.Children.Add(textBoxColumn);
-            CellItem item = new CellItem(edge, textBoxColumn, posX, posY);
+            textBox.SetBinding(TextBlock.TextProperty, new Binding() { Source = edge.Weight, Path = new PropertyPath("Value"), Mode = BindingMode.TwoWay });
+
+            Matrix.Children.Add(textBox);
+            CellItem item = new CellItem(edge, textBox, posX, posY);
 
             return item;
         }
@@ -139,12 +144,16 @@ namespace GraphBuilder
 
             Matrix.ShowGridLines = true;
 
-            // First cell
+            // Пустая угловая ячейка
+            Matrix.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(ITEM_SIZE, GridUnitType.Pixel) });
+            Matrix.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(ITEM_SIZE, GridUnitType.Pixel) });
+
+            // Задаёт границу матрицы
             Matrix.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(ITEM_SIZE, GridUnitType.Pixel) });
             Matrix.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(ITEM_SIZE, GridUnitType.Pixel) });
 
 
-            // Initialize Header rows and columns
+            // Инициализация заголовков 
             foreach (GraphNode itemData in GraphData.GraphNode)
             {
                 Matrix.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
@@ -158,7 +167,7 @@ namespace GraphBuilder
                 freeCell++;
             }
 
-            // Initialize cells
+            // Инициализация ячеек
             foreach (GraphEdge itemData in GraphData.GraphEdge)
             {
                 int FirstPos = GetPosByHeader(itemData.GraphNode);
@@ -167,7 +176,7 @@ namespace GraphBuilder
                 string style = "GridItem";
 
                 if (MainWindow.GraphicController != null)
-                    if (MainWindow.GraphicController._activatedPath.FirstOrDefault(c => c.ID == itemData.EdgeID) != null)
+                    if (MainWindow.GraphicController.ActivatedPath.FirstOrDefault(c => c.ID == itemData.EdgeID) != null)
                     {
                         style = "ActivatedGridItem";
                     }
@@ -179,6 +188,7 @@ namespace GraphBuilder
                 CellItems.Add(itemCellMirrored);
             }
         }
+        #endregion
 
         public AdjencyMatrix(GraphStructure graph, Grid visual)
         {
@@ -192,7 +202,7 @@ namespace GraphBuilder
             InitializeGrid();
         }
 
-        // Work methods
+        #region Внешние методы
         public List<string[,]> GetOutputMatrix()
         {
             List<string[,]> output = new List<string[,]>();
@@ -220,7 +230,7 @@ namespace GraphBuilder
                         CellItem item = CellItems.FirstOrDefault(c => c.PosX == j && c.PosY == i);
                         if (item != null)
                             if (MainWindow.GraphicController != null)
-                                if (MainWindow.GraphicController._activatedPath.FirstOrDefault(c => c.ID == item.data.EdgeID) != null)
+                                if (MainWindow.GraphicController.ActivatedPath.FirstOrDefault(c => c.ID == item.data.EdgeID) != null)
                                 {
                                     output[i][j, 0] = Convert.ToString(item.data.Weight);
                                     output[i][j, 1] = "#90EE90";
@@ -236,5 +246,6 @@ namespace GraphBuilder
 
             return output;
         }
+        #endregion
     }
 }

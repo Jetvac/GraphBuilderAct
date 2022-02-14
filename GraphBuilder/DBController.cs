@@ -57,30 +57,11 @@ namespace GraphBuilder
         }
 
 
-        // Database manipulate methods
-        public void ChangeGraphName(string newName)
-        {
-            _lpConnection.GraphStructure.FirstOrDefault(c => c.GraphID == _structureID).Name = newName;
-            SaveChanges();
-        }
-        public void ChangeNodeName(int nodeID, string newName)
-        {
-            _lpConnection.GraphNode.FirstOrDefault(c => c.NodeID == nodeID).Name = newName;
-            SaveChanges();
-        }
 
-        public void ChangeNodeAbbreviation(int nodeID, string abbreviation)
-        {
-            _lpConnection.GraphNode.FirstOrDefault(c => c.NodeID == nodeID).Abbreviation = abbreviation;
-            SaveChanges();
-        }
+        #region Методы инициализации объектов в БД
         /// <summary>
-        /// Create new node in database and return result
+        /// Создаёт узел в базе данных
         /// </summary>
-        /// <param name="nodeId"></param>
-        /// <param name="nodeName"></param>
-        /// <param name="posX"></param>
-        /// <param name="posY"></param>
         /// <returns></returns>
         public Node CreateNode(string nodeName, double posX, double posY, string abbreviation)
         {
@@ -105,15 +86,11 @@ namespace GraphBuilder
             return null;
         }
         /// <summary>
-        /// Create new edge in database and return result
+        /// Создаёт ребро в базе данных
         /// </summary>
-        /// <param name="baseNode"></param>
-        /// <param name="adressNode"></param>
-        /// <param name="weight"></param>
         /// <returns></returns>
         public Edge CreateEdge(Node baseNode, Node adressNode, int weight)
         {
-            // Create edge in base
             int newEdgeID = 0;
             if (!(_lpConnection.GraphEdge.Count() == 0))
             {
@@ -132,31 +109,29 @@ namespace GraphBuilder
 
             return null;
         }
-        /// <summary>
-        /// Remove node and related edge from database
-        /// </summary>
-        /// <param name="node"></param>
-        public void DeleteNode(Node node)
-        {
-            GraphNode graphNode = _lpConnection.GraphNode.FirstOrDefault(c => c.NodeID == node.ID);
-            List<GraphEdge> relatedEdge = _lpConnection.GraphEdge.Where(c => c.BaseNodeID == graphNode.NodeID || c.AddressNodeID == graphNode.NodeID).ToList();
+        #endregion
 
-            foreach (GraphEdge edge in relatedEdge) { _lpConnection.GraphEdge.Remove(edge); }
-            _lpConnection.GraphNode.Remove(graphNode);
-            
+        #region Методы манипулирования данными в БД
+        public void ChangeGraphName(string newName)
+        {
+            _lpConnection.GraphStructure.FirstOrDefault(c => c.GraphID == _structureID).Name = newName;
             SaveChanges();
         }
-        public void DeleteEdge(Edge edge)
+        public void ChangeNodeName(int nodeID, string newName)
         {
-            GraphEdge graphEdge = _lpConnection.GraphEdge.FirstOrDefault(c => c.EdgeID == edge.ID);
-            _lpConnection.GraphEdge.Remove(graphEdge);
+            _lpConnection.GraphNode.FirstOrDefault(c => c.NodeID == nodeID).Name = newName;
+            SaveChanges();
+        }
+        public void ChangeNodeAbbreviation(int nodeID, string abbreviation)
+        {
+            _lpConnection.GraphNode.FirstOrDefault(c => c.NodeID == nodeID).Abbreviation = abbreviation;
             SaveChanges();
         }
         /// <summary>
-            /// Change edge weight value in database
-            /// </summary>
-            /// <param name="edge"></param>
-            /// <param name="value"></param>
+        /// Change edge weight value in database
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <param name="value"></param>
         public void ChangeEdgeWeightValue(Edge edge, int value)
         {
             GraphEdge data = _lpConnection.GraphEdge.FirstOrDefault(c => c.EdgeID == edge.ID);
@@ -187,10 +162,37 @@ namespace GraphBuilder
             }
             return true;
         }
+        #endregion
 
-        // Base contact methods
+        #region Методы удаления объектов из БД
         /// <summary>
-        /// Save changes in data base
+        /// Удаляет узел и связанные с ним объекты из базы данных
+        /// </summary>
+        /// <param name="node"></param>
+        public void DeleteNode(Node node)
+        {
+            GraphNode graphNode = _lpConnection.GraphNode.FirstOrDefault(c => c.NodeID == node.ID);
+            List<GraphEdge> relatedEdge = _lpConnection.GraphEdge.Where(c => c.BaseNodeID == graphNode.NodeID || c.AddressNodeID == graphNode.NodeID).ToList();
+
+            foreach (GraphEdge edge in relatedEdge) { _lpConnection.GraphEdge.Remove(edge); }
+            _lpConnection.GraphNode.Remove(graphNode);
+
+            SaveChanges();
+        }
+        /// <summary>
+        /// Удаляет ребро и связанные с ним объекты из базы данных
+        /// </summary>
+        /// <param name="edge"></param>
+        public void DeleteEdge(Edge edge)
+        {
+            GraphEdge graphEdge = _lpConnection.GraphEdge.FirstOrDefault(c => c.EdgeID == edge.ID);
+            _lpConnection.GraphEdge.Remove(graphEdge);
+            SaveChanges();
+        }
+        #endregion
+
+        /// <summary>
+        /// Сохраняет внесённые изменения в базе данных
         /// </summary>
         private bool SaveChanges()
         {
@@ -209,10 +211,11 @@ namespace GraphBuilder
         }
 
 
-        // Access methods
+        #region Методы доступа до приватных полей
         public Graph GetGraph()
         {
             return _graphRef;
         }
+        #endregion
     }
 }

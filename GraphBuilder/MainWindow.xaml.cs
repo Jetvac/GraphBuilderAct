@@ -20,6 +20,7 @@ namespace GraphBuilder
     /// </summary>
     public partial class MainWindow : Window
     {
+        #region Variables
         public static Graph classGraph;
         public static DBController dbController { get; set; }
         public static LP04Entities dbConnection { get; set; } = new LP04Entities();
@@ -33,10 +34,11 @@ namespace GraphBuilder
         public static TextBox pathLength { get; set; }
         private static Node _selectedNode { get; set; }
         private static Grid matrix { get; set; }
-        private static AdjencyMatrix matrixVisual { get; set; }
+        public static AdjencyMatrix matrixVisual { get; set; }
         private static bool _isNodeNameUpdating { get; set; } = false;
         private static bool _isNodeAbbreviationUpdating { get; set; } = false;
         public static ObservableCollection<GraphStructure> projectListSource = new ObservableCollection<GraphStructure>();
+        #endregion
 
         public static void ChangeControlMode(UserInputController type)
         {
@@ -106,52 +108,82 @@ namespace GraphBuilder
             _isNodeNameUpdating = false;
             UpdateSelectedNodeEdges();
         }
+        public static List<Node> GetNodesFromMinPath()
+        {
+            List<Node> nodes = new List<Node>();
+            List<Edge> path = GraphicController.ActivatedPath;
+            path.Reverse();
+
+            foreach (Edge edge in path)
+            {
+                if (!nodes.Contains(edge.BaseNode))
+                {
+                    nodes.Add(edge.BaseNode);
+                }
+            }
+
+            return nodes;
+        }
+
+        /*public int[] GetCanvasSize(ref Canvas canvas, int bias)
+        {
+            int posX, posY, width, height;
+            posX = 10000; posY = 10000; width = 0; height = 0;
+
+            foreach (var item in canvas.Children)
+            {
+                double itemPosX = Canvas.GetLeft((UIElement)item);
+                double itemPosY = Canvas.GetTop((UIElement)item);
+
+                if (posX > itemPosX)
+                {
+                    posX = Convert.ToInt32(itemPosX);
+                } 
+                if (posY > itemPosY)
+                {
+                    posY = Convert.ToInt32(itemPosY);
+                } 
+                if (width < itemPosX)
+                {
+                    width = Convert.ToInt32(itemPosX);
+                } 
+                if (height < itemPosY)
+                {
+                    height = Convert.ToInt32(itemPosY);
+                }
+            }
+
+            return new int[] { posX, posY, width, height };
+        }*/
+        /// <summary>
+        /// Получает изображение с canvas и преобразует его в bitmap формат 
+        /// </summary>
+        /// <param name="canvas"></param>
+        /// <returns></returns>
+        public System.Drawing.Bitmap ConvertCanvas2Bitmap(ref Canvas canvas)
+        {
+            RenderTargetBitmap rtb = new RenderTargetBitmap((int)canvas.RenderSize.Width,
+            (int)canvas.RenderSize.Height, 96d, 96d, System.Windows.Media.PixelFormats.Default);
+            rtb.Render(canvas);
+            var crop = new CroppedBitmap(rtb, new Int32Rect(0, 0, (int)canvas.RenderSize.Width, (int)canvas.RenderSize.Height));
+
+            System.Drawing.Bitmap resultBitmap;
+            BitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(crop));
+
+            using (Stream s = new MemoryStream())
+            {
+                encoder.Save(s);
+                resultBitmap = new System.Drawing.Bitmap(s);
+            }
+
+            return resultBitmap;
+        }
         public System.Drawing.Bitmap GetImage()
         {
-            RenderTargetBitmap rtb = new RenderTargetBitmap((int)WeightRender.RenderSize.Width,
-            (int)WeightRender.RenderSize.Height, 96d, 96d, System.Windows.Media.PixelFormats.Default);
-            rtb.Render(WeightRender);
-            var crop = new CroppedBitmap(rtb, new Int32Rect(0, 0, (int)WeightRender.RenderSize.Width, (int)WeightRender.RenderSize.Height));
-
-            RenderTargetBitmap nb = new RenderTargetBitmap((int)EdgeRender.RenderSize.Width,
-            (int)EdgeRender.RenderSize.Height, 96d, 96d, System.Windows.Media.PixelFormats.Default);
-            nb.Render(EdgeRender);
-            var cropEdge = new CroppedBitmap(nb, new Int32Rect(0, 0, (int)EdgeRender.RenderSize.Width, (int)EdgeRender.RenderSize.Height));
-
-            RenderTargetBitmap nas = new RenderTargetBitmap((int)NodeRender.RenderSize.Width,
-            (int)NodeRender.RenderSize.Height, 96d, 96d, System.Windows.Media.PixelFormats.Default);
-            nas.Render(NodeRender);
-            var cropNode = new CroppedBitmap(nas, new Int32Rect(0, 0, (int)NodeRender.RenderSize.Width, (int)NodeRender.RenderSize.Height));
-
-            System.Drawing.Bitmap weightBitmap;
-            System.Drawing.Bitmap edgeBitmap;
-            System.Drawing.Bitmap nodeBitmap;
-
-
-            BitmapEncoder weightEncoder = new PngBitmapEncoder();
-            weightEncoder.Frames.Add(BitmapFrame.Create(crop));
-
-            BitmapEncoder edgeEncoder = new PngBitmapEncoder();
-            edgeEncoder.Frames.Add(BitmapFrame.Create(cropEdge));
-
-            BitmapEncoder nodeEncoder = new PngBitmapEncoder();
-            nodeEncoder.Frames.Add(BitmapFrame.Create(cropNode));
-
-            using (Stream s = new MemoryStream())
-            {
-                weightEncoder.Save(s);
-                weightBitmap = new System.Drawing.Bitmap(s);
-            }
-            using (Stream s = new MemoryStream())
-            {
-                edgeEncoder.Save(s);
-                edgeBitmap = new System.Drawing.Bitmap(s);
-            }
-            using (Stream s = new MemoryStream())
-            {
-                nodeEncoder.Save(s);
-                nodeBitmap = new System.Drawing.Bitmap(s);
-            }
+            System.Drawing.Bitmap weightBitmap = ConvertCanvas2Bitmap(ref WeightRender);
+            System.Drawing.Bitmap edgeBitmap = ConvertCanvas2Bitmap(ref EdgeRender);
+            System.Drawing.Bitmap nodeBitmap = ConvertCanvas2Bitmap(ref NodeRender);
 
             var finalImage = new System.Drawing.Bitmap((int)EdgeRender.RenderSize.Width, (int)EdgeRender.RenderSize.Height, PixelFormat.Format32bppArgb);
 
@@ -163,28 +195,6 @@ namespace GraphBuilder
             graphics.DrawImage(nodeBitmap, 0, 0);
 
             return finalImage;
-        }
-        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
-        public static extern bool DeleteObject(IntPtr hObject);
-        private BitmapImage Bitmap2BitmapImage(System.Drawing.Bitmap bitmap)
-        {
-            IntPtr hBitmap = bitmap.GetHbitmap();
-            BitmapImage retval;
-
-            try
-            {
-                retval = (BitmapImage)Imaging.CreateBitmapSourceFromHBitmap(
-                             hBitmap,
-                             IntPtr.Zero,
-                             Int32Rect.Empty,
-                             BitmapSizeOptions.FromEmptyOptions());
-            }
-            finally
-            {
-                DeleteObject(hBitmap);
-            }
-
-            return retval;
         }
         #endregion
 
@@ -311,7 +321,7 @@ namespace GraphBuilder
         }
         private void NodeName_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (_isNodeNameUpdating) { return; }   
+            if (_isNodeNameUpdating) { return; }
             if (_selectedNode == null) { return; }
             dbController.ChangeNodeName(_selectedNode.ID, nodeName.Text);
         }
@@ -344,25 +354,37 @@ namespace GraphBuilder
             Edge edge = classGraph.FindEdgeByID((nodeRelatedEdgeList.SelectedItem as GraphEdge).EdgeID);
             GraphicController.MakeEdgeActive(edge);
         }
-
         private void Word_Click(object sender, RoutedEventArgs e)
         {
             if (matrixVisual == null) { return; }
 
             GraphStructure project = _projectList.SelectedItem as GraphStructure;
             if (project == null) { return; }
+            if (GraphicController == null) { return; }
+            if (GraphicController.ActivatedPath == null) { return; }
+            if (PathLength.Text.Length == 0) { return; }
 
             string path = "Example 1.docx";
             List<string[,]> table = matrixVisual.GetOutputMatrix();
+            string nodePath = "";
 
 
-            // Создание нового отчёта
+            foreach (Node node in GraphicController.MinPath)
+            {
+                nodePath += $"{node.Abbreviation} > ";
+            }
+
+            // Удаляет лишнее " > " с конца
+            nodePath = nodePath.Substring(0, nodePath.Length - 3);
+
+
             Report report = new Report();
-            // Добавление параграфов
             report.AddParagraph($"Проект: {project.Name}");
-            // Добавление таблицы
             report.AddParagraph("Матрица смежности: ");
             report.AddTable(table);
+            report.AddParagraph($"Путь: {nodePath}");
+            report.AddParagraph($"F = {PathLength.Text}");
+
             System.Drawing.Bitmap image = GetImage();
             image.Save("images.png");
             report.AddImageToBody("./images.png", image.Width, image.Height);
@@ -370,7 +392,6 @@ namespace GraphBuilder
 
             report.SaveDocument(path);
         }
-
         private void CloseProgramm_Click(object sender, RoutedEventArgs e)
         {
             App.Current.Shutdown();
