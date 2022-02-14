@@ -82,9 +82,17 @@ namespace GraphBuilder
         public List<HeaderItem> HeaderItemsColumns { get; set; } = new List<HeaderItem>();
         public List<HeaderItem> HeaderItemsRows { get; set; } = new List<HeaderItem>();
         public List<CellItem> CellItems { get; set; } = new List<CellItem>();
-        public int MatrixSize { get { return MatrixSize; } set { if (value >= 0) { MatrixSize = value; } } }
         public GraphStructure GraphData { get; set; }
 
+
+        // Init methods
+        /// <summary>
+        /// Метод инициализации загаловочных ячеек матрицы
+        /// </summary>
+        /// <param name="node">Источник данных используемый для заполнения ячейки</param>
+        /// <param name="posX"></param>
+        /// <param name="posY"></param>
+        /// <returns></returns>
         public HeaderItem InitNewHeaderItem(GraphNode node, int posX, int posY)
         {
             TextBox textBoxColumn = new TextBox()
@@ -95,6 +103,14 @@ namespace GraphBuilder
 
             return item;
         }
+        /// <summary>
+        /// Метод инициализации ячейки в матрице
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <param name="posX"></param>
+        /// <param name="posY"></param>
+        /// <param name="style"></param>
+        /// <returns></returns>
         public CellItem InitNewCellItem(GraphEdge edge, int posX, int posY, string style)
         {
             TextBox textBoxColumn = new TextBox()
@@ -105,24 +121,18 @@ namespace GraphBuilder
 
             return item;
         }
-
+        /// <summary>
+        /// Возвращает строку загаловочной ячейки
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <returns></returns>
         public int GetPosByHeader(GraphNode graph)
         {
             return HeaderItemsColumns.FirstOrDefault(c => c.data == graph).PosX;
         }
-
-        public AdjencyMatrix(GraphStructure graph, Grid visual)
-        {
-            Matrix = visual;
-            GraphData = new LP04Entities().GraphStructure.FirstOrDefault(c => c.GraphID == graph.GraphID);
-
-            Matrix.Children.Clear();
-            Matrix.RowDefinitions.Clear();
-            Matrix.ColumnDefinitions.Clear();
-
-            InitializeGrid();
-        }
-
+        /// <summary>
+        /// Генерирует матрицу и заполняет её
+        /// </summary>
         public void InitializeGrid()
         {
             int freeCell = 1;
@@ -147,7 +157,7 @@ namespace GraphBuilder
 
                 freeCell++;
             }
-            
+
             // Initialize cells
             foreach (GraphEdge itemData in GraphData.GraphEdge)
             {
@@ -168,6 +178,55 @@ namespace GraphBuilder
                 CellItems.Add(itemCell);
                 CellItems.Add(itemCellMirrored);
             }
+        }
+
+        public AdjencyMatrix(GraphStructure graph, Grid visual)
+        {
+            Matrix = visual;
+            GraphData = new LP04Entities().GraphStructure.FirstOrDefault(c => c.GraphID == graph.GraphID);
+
+            Matrix.Children.Clear();
+            Matrix.RowDefinitions.Clear();
+            Matrix.ColumnDefinitions.Clear();
+
+            InitializeGrid();
+        }
+
+        // Work methods
+        public List<string[]> GetOutputMatrix()
+        {
+            List<string[]> output = new List<string[]>();
+
+            for (int i = 0; i < HeaderItemsRows.Count(); i++)
+            {
+                output.Add(new string[HeaderItemsRows.Count()]);
+
+                for (int j = 0; j < HeaderItemsColumns.Count(); j++)
+                {
+                    if (i == 0 && j != 0) // Загаловочная ячейка (Слева)
+                    {
+                        output[i][j] = HeaderItemsRows[j].data.Abbreviation;
+                    }
+                    else if (j == 0 && i != 0) // Загаловочная ячейка (Сверху)
+                    {
+                        output[i][j] = HeaderItemsColumns[i].data.Abbreviation;
+                    }
+                    else if (i == 0 && j != 0)
+                    {
+                        output[i][j] = "";
+                    }
+                    else if (i != 0 && j != 0)
+                    {
+                        CellItem item = CellItems.FirstOrDefault(c => c.PosX == j && c.PosY == i);
+                        if (item != null)
+                            output[i][j] = Convert.ToString(item.data.Weight);
+                        else
+                            output[i][j] = "";
+                    }
+                }
+            }
+
+            return output;
         }
     }
 }

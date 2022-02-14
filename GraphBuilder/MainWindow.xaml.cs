@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using static GraphBuilder.Graph;
@@ -64,6 +66,7 @@ namespace GraphBuilder
             matrix = Matrix;
         }
 
+        #region Методы работы с логикой программы
         public static void ClearTabPanel()
         {
             _selectedNode = null;
@@ -161,6 +164,29 @@ namespace GraphBuilder
 
             return finalImage;
         }
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        public static extern bool DeleteObject(IntPtr hObject);
+        private BitmapImage Bitmap2BitmapImage(System.Drawing.Bitmap bitmap)
+        {
+            IntPtr hBitmap = bitmap.GetHbitmap();
+            BitmapImage retval;
+
+            try
+            {
+                retval = (BitmapImage)Imaging.CreateBitmapSourceFromHBitmap(
+                             hBitmap,
+                             IntPtr.Zero,
+                             Int32Rect.Empty,
+                             BitmapSizeOptions.FromEmptyOptions());
+            }
+            finally
+            {
+                DeleteObject(hBitmap);
+            }
+
+            return retval;
+        }
+        #endregion
 
         private static ObservableCollection<GraphStructure> ListToOBS(List<GraphStructure> structures)
         {
@@ -181,7 +207,7 @@ namespace GraphBuilder
             NodeAbbName.IsEnabled = false;
         }
 
-        //Events
+        #region События
         private void AddNodeSwitch_Click(object sender, RoutedEventArgs e)
         {
             ChangeControlMode(UserInputController.NodeCreating);
@@ -321,12 +347,34 @@ namespace GraphBuilder
 
         private void Word_Click(object sender, RoutedEventArgs e)
         {
-            GetImage().Save(@"./logo.png");
+            if (matrixVisual == null) { return; }
+
+            GraphStructure project = _projectList.SelectedItem as GraphStructure;
+            if (project == null) { return; }
+
+            string path = "Example 1.docx";
+            List<string[]> table = matrixVisual.GetOutputMatrix();
+
+
+            // Создание нового отчёта
+            Report report = new Report();
+            // Добавление параграфов
+            report.AddParagraph($"Проект: {project.Name}");
+            // Добавление таблицы
+            report.AddParagraph("Матрица смежности: ");
+            report.AddTable(table);
+            System.Drawing.Bitmap image = GetImage();
+            image.Save("images.png");
+            report.AddImageToBody("./images.png", image.Width, image.Height);
+
+
+            report.SaveDocument(path);
         }
 
         private void CloseProgramm_Click(object sender, RoutedEventArgs e)
         {
             App.Current.Shutdown();
         }
+        #endregion
     }
 }
