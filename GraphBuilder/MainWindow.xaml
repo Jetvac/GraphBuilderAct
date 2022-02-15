@@ -29,7 +29,7 @@
             <MenuItem Header="Выход" Click="CloseProgramm_Click"/>
         </Menu>
 
-        <TabControl Grid.Row="1">
+        <TabControl Grid.Row="1" Background="White">
             <TabItem Header="Главная">
                 <TabItem.Content>
                     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -88,7 +88,7 @@
                                     </Grid>
                                     <GroupBox Header="Управление пространством">
                                         <StackPanel x:Name="UserActiveController" VerticalAlignment="Top">
-                                            <Button x:Name="AddNodeSwitch" Margin="5" Click="AddNodeSwitch_Click" ToolTip="Создаёт участок и помещает его на поле">Добавить участок</Button>
+                                            <Button x:Name="AddNodeSwitch" Margin="5" Click="AddNodeSwitch_Click" ToolTip="Создаёт участок и помещает его в проект">Добавить участок</Button>
                                             <Button x:Name="DeleteNodeSwitch" Margin="5" Click="DeleteNodeSwitch_Click" ToolTip="Удаляет участок и связанные с ним газопроводы">Удалить участок</Button>
                                             <Button x:Name="AddEdgeSwitch" Margin="5" Click="AddEdgeSwitch_Click" ToolTip="Размещает газопровод между участками">Соединить участки</Button>
                                             <Button x:Name="DefaultModeSwitch" Margin="5" Click="DefaultModeSwitch_Click" ToolTip="Режим перемещения участков по рабочему пространству">По умолчанию</Button>
@@ -131,7 +131,7 @@
                                             </Grid>
                                             <Separator/>
                                             <DataGrid x:Name="NodeRelatedEdgeList" AutoGenerateColumns="False" CanUserAddRows="False" MaxHeight="200" CanUserReorderColumns="False" CanUserDeleteRows="False" CanUserResizeColumns="False" CanUserResizeRows="False"
-                                      ToolTip="Список газопроводов, которые входят и исходят из выбранного участка">
+                                            ToolTip="Список газопроводов, которые входят и исходят из выбранного участка">
                                                 <DataGrid.Columns>
                                                     <DataGridTextColumn Header="Точка 1" Width="*" Binding="{Binding GraphNode.Abbreviation}"/>
                                                     <DataGridTextColumn Header="Точка 2" Width="*" Binding="{Binding GraphNode1.Abbreviation}"/>
