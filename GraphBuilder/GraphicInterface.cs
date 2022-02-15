@@ -462,6 +462,7 @@ namespace GraphBuilder
                         if (path == null)
                         {
                             MessageBox.Show("Путь не найден!", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
+                            return;
                         }
 
                         foreach (Edge edge in path)

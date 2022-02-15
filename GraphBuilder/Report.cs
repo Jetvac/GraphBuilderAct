@@ -10,6 +10,7 @@ using DW = DocumentFormat.OpenXml.Drawing.Wordprocessing;
 using A = DocumentFormat.OpenXml.Drawing;
 using PIC = DocumentFormat.OpenXml.Drawing.Pictures;
 using System;
+using System.Windows;
 
 namespace GraphBuilder
 {
@@ -255,29 +256,36 @@ namespace GraphBuilder
         /// <param name="path">Путь, по которому нужно сохранить документ</param>
         public void SaveDocument(string path)
         {
-            using (WordprocessingDocument wordDocument = WordprocessingDocument.Create(path, WordprocessingDocumentType.Document, true))
+            try
             {
-                MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
-
-                foreach (image item in images)
+                using (WordprocessingDocument wordDocument = WordprocessingDocument.Create(path, WordprocessingDocumentType.Document, true))
                 {
-                    ImagePart imagePart = wordDocument.MainDocumentPart.AddImagePart(ImagePartType.Png);
+                    MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
 
-                    using (FileStream stream = new FileStream(item.fileName, FileMode.Open))
+                    foreach (image item in images)
                     {
-                        imagePart.FeedData(stream);
+                        ImagePart imagePart = wordDocument.MainDocumentPart.AddImagePart(ImagePartType.Png);
+
+                        using (FileStream stream = new FileStream(item.fileName, FileMode.Open))
+                        {
+                            imagePart.FeedData(stream);
+                        }
+
+                        this.body.AppendChild(new Paragraph(new Run(GetImageElement(
+                             wordDocument.MainDocumentPart.GetIdOfPart(imagePart),
+                             item.fileName, item.fileName, item.width, item.height))));
                     }
 
-                    this.body.AppendChild(new Paragraph(new Run(GetImageElement(
-                         wordDocument.MainDocumentPart.GetIdOfPart(imagePart),
-                         item.fileName, item.fileName, item.width, item.height))));
+                    mainPart.Document = new Document();
+                    mainPart.Document.Body = this.body;
+                    mainPart.Document.Save();
+                    wordDocument.Save();
                 }
-
-                mainPart.Document = new Document();
-                mainPart.Document.Body = this.body;
-                mainPart.Document.Save();
-                wordDocument.Save();
+            } catch(Exception ex)
+            {
+                MessageBox.Show("Не удалось создать файл Word.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+           
         }
     }
 }

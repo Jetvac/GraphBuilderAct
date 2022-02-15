@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing.Drawing2D;
@@ -233,12 +234,11 @@ namespace GraphBuilder
         private void Grid_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (GraphicController == null) { return; }
+            Point mousePos = e.GetPosition((Border)sender);
 
             switch (GraphicController.CurrentUserControlType)
             {
                 case UserInputController.NodeCreating:
-                    Point mousePos = e.GetPosition((Border)sender);
-
                     Node node = dbController.CreateNode("Без названия", mousePos.X, mousePos.Y, "NN");
                     if (node == null) { return; }
                     GraphicController.InitializeNodeGraphic(node);
@@ -339,8 +339,8 @@ namespace GraphBuilder
         }
         private void RemoveEdge_Click(object sender, RoutedEventArgs e)
         {
-            GraphicController.TakeOffEdgeActivation();
             if (nodeRelatedEdgeList.SelectedItem == null) { return; }
+            GraphicController.TakeOffEdgeActivation();
             Edge edge = classGraph.FindEdgeByID((nodeRelatedEdgeList.SelectedItem as GraphEdge).EdgeID);
             dbController.DeleteEdge(edge);
             GraphicController.RemoveEdge(edge);
@@ -359,38 +359,50 @@ namespace GraphBuilder
             if (matrixVisual == null) { return; }
 
             GraphStructure project = _projectList.SelectedItem as GraphStructure;
-            if (project == null) { return; }
+            if (project == null) { MessageBox.Show("Проект не выбран.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error); return; }
             if (GraphicController == null) { return; }
-            if (GraphicController.ActivatedPath == null) { return; }
+            if (GraphicController.ActivatedPath == null) { MessageBox.Show("Путь не построен.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error); return; }
             if (PathLength.Text.Length == 0) { return; }
 
-            string path = "Example 1.docx";
-            List<string[,]> table = matrixVisual.GetOutputMatrix();
-            string nodePath = "";
 
 
-            foreach (Node node in GraphicController.MinPath)
-            {
-                nodePath += $"{node.Abbreviation} > ";
-            }
+            string path = null;
+            using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
+                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
 
-            // Удаляет лишнее " > " с конца
-            nodePath = nodePath.Substring(0, nodePath.Length - 3);
+                    path = dialog.SelectedPath + "\\Example 1.docx";
 
-
-            Report report = new Report();
-            report.AddParagraph($"Проект: {project.Name}");
-            report.AddParagraph("Матрица смежности: ");
-            report.AddTable(table);
-            report.AddParagraph($"Путь: {nodePath}");
-            report.AddParagraph($"F = {PathLength.Text}");
-
-            System.Drawing.Bitmap image = GetImage();
-            image.Save("images.png");
-            report.AddImageToBody("./images.png", image.Width, image.Height);
+                    List<string[,]> table = matrixVisual.GetOutputMatrix();
+                    string nodePath = "";
 
 
-            report.SaveDocument(path);
+                    foreach (Node node in GraphicController.MinPath)
+                    {
+                        nodePath += $"{node.Abbreviation} > ";
+                    }
+
+                    // Удаляет лишнее " > " с конца
+                    nodePath = nodePath.Substring(0, nodePath.Length - 3);
+
+
+                    Report report = new Report();
+                    report.AddParagraph($"Проект: {project.Name}");
+                    report.AddParagraph("Матрица смежности: ");
+                    report.AddTable(table);
+                    report.AddParagraph($"Путь: {nodePath}");
+                    report.AddParagraph($"F = {PathLength.Text}");
+
+                    System.Drawing.Bitmap image = GetImage();
+                    image.Save("images.png");
+                    report.AddImageToBody("./images.png", image.Width, image.Height);
+
+
+                    report.SaveDocument(path);
+                }
+
+
+            
         }
         private void CloseProgramm_Click(object sender, RoutedEventArgs e)
         {
