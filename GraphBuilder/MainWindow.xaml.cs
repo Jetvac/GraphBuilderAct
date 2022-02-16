@@ -374,7 +374,9 @@ namespace GraphBuilder
                     path = dialog.SelectedPath + "\\Example 1.docx";
 
                     List<string[,]> table = matrixVisual.GetOutputMatrix();
+                    Dictionary<int, int> nodeMap = new Dictionary<int, int>();
                     string nodePath = "";
+                    string matModel = "";
 
 
                     foreach (Node node in GraphicController.MinPath)
@@ -382,12 +384,26 @@ namespace GraphBuilder
                         nodePath += $"{node.Abbreviation} > ";
                     }
 
-                    // Удаляет лишнее " > " с конца
+                    foreach (Edge edge in classGraph.graphEdges)
+                    {
+                        if (!nodeMap.ContainsKey(edge.BaseNode.ID))
+                            nodeMap.Add(edge.BaseNode.ID, nodeMap.Count == 0 ? 0 : nodeMap.Values.Max() + 1);
+                        if (!nodeMap.ContainsKey(edge.AddressNode.ID))
+                            nodeMap.Add(edge.AddressNode.ID, nodeMap.Count == 0 ? 0 : nodeMap.Values.Max() + 1);
+
+                        matModel += $"{edge.Weight}x{nodeMap[edge.BaseNode.ID]}{nodeMap[edge.AddressNode.ID]} + ";
+                    }
+
+                    // Удаляет лишнее с конца
                     nodePath = nodePath.Substring(0, nodePath.Length - 3);
+                    matModel = matModel.Substring(0, matModel.Length - 3);
+                    matModel += " -> min";
 
 
                     Report report = new Report();
                     report.AddParagraph($"Проект: {project.Name}");
+                    report.AddParagraph($"Математическая модель:");
+                    report.AddParagraph($"{matModel}");
                     report.AddParagraph("Матрица смежности: ");
                     report.AddTable(table);
                     report.AddParagraph($"Путь: {nodePath}");
